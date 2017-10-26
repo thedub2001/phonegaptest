@@ -4,6 +4,7 @@
     <description>
         This app implements the Nordic UART BLE Service.
     </description>
+    <preference name="android-minSdkVersion" value="14" />
     <author href="http://github.com/don">
         Don Coleman
     </author>
