@@ -1,17 +1,11 @@
-## Adafruit UART
+# UART Example
 
-UART example using an Arduino and [Adafruit's BluefruitLE](http://www.adafruit.com/products/1697) breakout board.
+This app implements the [Nordic UART BLE Service](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-spi-breakout/uart-service) using Apache Cordova and cordova-plugin-ble-peripheral. UART isn't the best use of Bluetooth Low Energy services, but it makes a good example since it demonstrates read, write, and notify.
 
-Use the [callbackEcho sketch](https://github.com/adafruit/Adafruit_nRF8001/blob/master/examples/callbackEcho/callbackEcho.ino) and see [Adafruit's tutorial](https://learn.adafruit.com/getting-started-with-the-nrf8001-bluefruit-le-breakout/software-uart-service) for setting up the hardware and Arduino code.
+    cordova platform add ios
+    cordova run ios --device
 
-Hardware
+Use a second device with the Adafruit Bluefruit LE Connect app to connect to this service.
 
- * [Arduino](http://www.adafruit.com/products/50)
- * [BluefruitLE](http://www.adafruit.com/products/1697)
-
-Install
-
-    $ cordova platform add android ios
-    $ cordova plugin add com.megster.cordova.ble
-    $ cordova run
-
+ * [Adafruit Bluefruit LE Connect for iOS](https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=830125974&mt=8)
+ * [Adafruit Bluefruit LE Connect for Android](https://play.google.com/store/apps/details?id=com.adafruit.bluefruit.le.connect&hl=en)
