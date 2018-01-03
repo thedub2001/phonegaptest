@@ -32,6 +32,13 @@ function stringToBytes(string) {
     return array.buffer;
 }
 
+function create(text, name, type) {
+  var dataButton = document.getElementById("saveDataButton");
+  var file = new Blob([text], {type: type});
+  dataButton.href = URL.createObjectURL(file);
+  dataButton.download = name;
+}
+
 // this is Nordic's UART service
 var bluefruit = {
     serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
@@ -40,6 +47,9 @@ var bluefruit = {
 };
 
 var app = {
+    var dataBuffer = new Uint8Array(2000);
+    var LastIndex = 0;
+
     initialize: function() {
         this.bindEvents();
         detailPage.hidden = true;
@@ -49,6 +59,7 @@ var app = {
         refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
         sendButton.addEventListener('click', this.sendData, false);
         disconnectButton.addEventListener('touchstart', this.disconnect, false);
+        prepareDataButton.addEventListener('touchstart', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
     },
     onDeviceReady: function() {
@@ -79,6 +90,7 @@ var app = {
                 // subscribe for incoming data
                 ble.startNotification(deviceId, bluefruit.serviceUUID, bluefruit.rxCharacteristic, app.onData, app.onError);
                 sendButton.dataset.deviceId = deviceId;
+                // to do : add a saveDataButton dataset here ?
                 disconnectButton.dataset.deviceId = deviceId;
                 resultDiv.innerHTML = "";
                 app.showDetailPage();
@@ -104,10 +116,20 @@ var app = {
 
     },
     onData: function(data) { // data received from Arduino
-        console.log(data);
-        resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + bytesToString(data) + "<br/>";
-        resultDiv.scrollTop = resultDiv.scrollHeight;
+        // add a overBuffer protection
+        dataBuffer.set(data, lastIndex);
+        lastIndex = data.length + lastIndex;
+        //console.log(data);
+        //resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + bytesToString(data) + "<br/>";
+        //resultDiv.scrollTop = resultDiv.scrollHeight;
+
     },
+    prepareData: function(event) { // save data to text file
+        var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
+        create(stringArray, 'dataPIR.txt', 'text/plain');
+        dataBuffer = new Uint8Array(2000);
+
+    }
     sendData: function(event) { // send data to Arduino
 
         var success = function() {
