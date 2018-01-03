@@ -46,10 +46,12 @@ var bluefruit = {
     rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e'  // receive is from the phone's perspective
 };
 
+var dataBuffer = new Uint8Array(2000);
+var LastIndex = 0;
+
 var app = {
-    var dataBuffer = new Uint8Array(2000);
-    var LastIndex = 0;
-    
+
+
     initialize: function() {
         this.bindEvents();
         detailPage.hidden = true;
