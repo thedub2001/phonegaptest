@@ -118,9 +118,11 @@ var app = {
     },
     onData: function(data) { // data received from Arduino
         var temp = new Uint8Array(data);
-        var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
-        
+        var stringArray = Array.prototype.slice.call(temp).map(String);
+        var stringArray2 = Array.prototype.slice.call(data).map(String);
+
         resultDiv.innerHTML = resultDiv.innerHTML + stringArray + "<br/>";
+        resultDiv.innerHTML = resultDiv.innerHTML + stringArray2 + "<br/>";
         
         dataBuffer.set(temp, lastIndex);
         lastIndex = temp.length + lastIndex;
