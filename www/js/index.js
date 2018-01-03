@@ -117,6 +117,8 @@ var app = {
 
     },
     onData: function(data) { // data received from Arduino
+        resultDiv.innerHTML = resultDiv.innerHTML + data.length + "<br/>";
+        
         dataBuffer.set(data, lastIndex);
         lastIndex = data.length + lastIndex;
     },
