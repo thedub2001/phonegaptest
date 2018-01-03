@@ -61,6 +61,7 @@ var app = {
         refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
         sendButton.addEventListener('click', this.sendData, false);
         disconnectButton.addEventListener('touchstart', this.disconnect, false);
+        prepareDataButton.addEventListener('touchstart', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
     },
     onDeviceReady: function() {
@@ -116,9 +117,14 @@ var app = {
 
     },
     onData: function(data) { // data received from Arduino
-        console.log(data);
-        resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + bytesToString(data) + "<br/>";
-        resultDiv.scrollTop = resultDiv.scrollHeight;
+        dataBuffer.set(data, lastIndex);
+        lastIndex = data.length + lastIndex;
+    },
+    prepareData: function(event) { // save data to text file
+        var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
+        create(stringArray, 'dataPIR.txt', 'text/plain');
+        dataBuffer = new Uint8Array(2000);
+
     },
     sendData: function(event) { // send data to Arduino
 
