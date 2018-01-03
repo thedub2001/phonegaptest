@@ -123,7 +123,7 @@ var app = {
     },
     prepareData: function(event) { // save data to text file
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
-        resultDiv.innerHTML = stringArray;
+        resultDiv.value = stringArray;
         //create(stringArray, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(2000);
 
