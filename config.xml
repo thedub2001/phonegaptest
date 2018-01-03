@@ -10,5 +10,4 @@
     <content src="index.html" />
     <access origin="*" />
     <plugin name="cordova-plugin-ble-central" spec="~1.1.4" />
-    <icon src="icon.png" />
 </widget>
