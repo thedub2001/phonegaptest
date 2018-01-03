@@ -124,8 +124,15 @@ var app = {
     prepareData: function(event) { // save data to text file
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
         resultDiv.innerHTML = stringArray;
-        create(stringArray, 'dataPIR.txt', 'text/plain');
+        //create(stringArray, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(2000);
+
+        var hiddenElement = document.createElement('a');
+
+        hiddenElement.href = 'data:attachment/text,' + encodeURI(stringArray);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'myFile.txt';
+        hiddenElement.click();
 
     },
     sendData: function(event) { // send data to Arduino
