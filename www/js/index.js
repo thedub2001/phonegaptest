@@ -46,7 +46,7 @@ var bluefruit = {
     rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e'  // receive is from the phone's perspective
 };
 
-var dataBuffer = new Uint8Array(160000);
+var dataBuffer = new Uint8Array(29000);
 var lastIndex = 0;
 
 var app = {
@@ -125,7 +125,7 @@ var app = {
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
         resultDiv.value = stringArray;
         //create(stringArray, 'dataPIR.txt', 'text/plain');
-        dataBuffer = new Uint8Array(160000);
+        dataBuffer = new Uint8Array(29000);
         lastIndex=0;
     },
     sendData: function(event) { // send data to Arduino
