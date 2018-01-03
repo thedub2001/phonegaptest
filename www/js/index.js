@@ -39,9 +39,6 @@ function create(text, name, type) {
   dataButton.download = name;
 }
 
-
-
-
 // this is Nordic's UART service
 var bluefruit = {
     serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
@@ -49,37 +46,11 @@ var bluefruit = {
     rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e'  // receive is from the phone's perspective
 };
 
-var dataBuffer = new Uint8Array(20000);
+var dataBuffer = new Uint8Array(160000);
 var lastIndex = 0;
 
 var app = {
-    writeFile : function() {
-       var type = window.TEMPORARY;
-       var size = 5*1024*1024;
-       window.requestFileSystem(type, size, successCallback, errorCallback)
 
-       function successCallback(fs) {
-          fs.root.getFile('log.txt', {create: true}, function(fileEntry) {
-
-             fileEntry.createWriter(function(fileWriter) {
-                fileWriter.onwriteend = function(e) {
-                   alert('Write completed.');
-                };
-
-                fileWriter.onerror = function(e) {
-                   alert('Write failed: ' + e.toString());
-                };
-
-                var blob = new Blob([stringArray], {type: 'text/plain'});
-                fileWriter.write(blob);
-             }, errorCallback);
-          }, errorCallback);
-       }
-
-       function errorCallback(error) {
-          alert("ERROR: " + error.code)
-       }
-    },
 
     initialize: function() {
         this.bindEvents();
@@ -92,7 +63,6 @@ var app = {
         disconnectButton.addEventListener('touchstart', this.disconnect, false);
         prepareDataButton.addEventListener('touchstart', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
-        writeFile.addEventListener("click", writeFile);
     },
     onDeviceReady: function() {
         app.refreshDeviceList();
@@ -155,7 +125,7 @@ var app = {
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
         resultDiv.value = stringArray;
         //create(stringArray, 'dataPIR.txt', 'text/plain');
-        dataBuffer = new Uint8Array(20000);
+        dataBuffer = new Uint8Array(160000);
         lastIndex=0;
     },
     sendData: function(event) { // send data to Arduino
