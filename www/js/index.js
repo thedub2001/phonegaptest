@@ -119,13 +119,15 @@ var app = {
     onData: function(data) { // data received from Arduino
         var temp = new Uint8Array(data);
         var stringArray = Array.prototype.slice.call(temp).map(String);
-        //var stringArray2 = Array.prototype.slice.call(data).map(String);
-
         resultDiv.innerHTML = resultDiv.innerHTML + stringArray + "<br/>";
-        resultDiv.innerHTML = resultDiv.innerHTML + stringArray2 + "<br/>";
-        
+       
         dataBuffer.set(temp, lastIndex);
         lastIndex = temp.length + lastIndex;
+        resultDiv.innerHTML = resultDiv.innerHTML + "temp.length : " + temp.length + "<br/>";
+        resultDiv.innerHTML = resultDiv.innerHTML + "lastIndex : " + lastIndex + "<br/>";
+        resultDiv.innerHTML = resultDiv.innerHTML + "lastIndex : " + lastIndex + "<br/>";
+        var stringArray = Array.prototype.slice.call(temp).map(String);
+        resultDiv.innerHTML = resultDiv.innerHTML + "dataBuffer : " + stringArray + "<br/>";
     },
     prepareData: function(event) { // save data to text file
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
