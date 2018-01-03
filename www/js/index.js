@@ -47,7 +47,7 @@ var bluefruit = {
 };
 
 var dataBuffer = new Uint8Array(2000);
-var LastIndex = 0;
+var lastIndex = 0;
 
 var app = {
 
