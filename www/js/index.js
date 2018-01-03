@@ -117,10 +117,11 @@ var app = {
 
     },
     onData: function(data) { // data received from Arduino
-        resultDiv.innerHTML = resultDiv.innerHTML + data.length + "<br/>";
+        var temp = new Uint8Array(buffer)
+        resultDiv.innerHTML = resultDiv.innerHTML + temp.length + "<br/>";
         
-        dataBuffer.set(data, lastIndex);
-        lastIndex = data.length + lastIndex;
+        dataBuffer.set(temp, lastIndex);
+        lastIndex = temp.length + lastIndex;
     },
     prepareData: function(event) { // save data to text file
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
