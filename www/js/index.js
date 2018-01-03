@@ -32,6 +32,13 @@ function stringToBytes(string) {
     return array.buffer;
 }
 
+function create(text, name, type) {
+  var dataButton = document.getElementById("saveDataButton");
+  var file = new Blob([text], {type: type});
+  dataButton.href = URL.createObjectURL(file);
+  dataButton.download = name;
+}
+
 // this is Nordic's UART service
 var bluefruit = {
     serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
