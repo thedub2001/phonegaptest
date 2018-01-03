@@ -47,6 +47,9 @@ var bluefruit = {
 };
 
 var app = {
+    var dataBuffer = new Uint8Array(2000);
+    var LastIndex = 0;
+    
     initialize: function() {
         this.bindEvents();
         detailPage.hidden = true;
