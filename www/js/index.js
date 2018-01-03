@@ -126,6 +126,7 @@ var app = {
         resultDiv.value = stringArray;
         //create(stringArray, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(20000);
+        lastIndex=0;
 
         var hiddenElement = document.createElement('a');
 
