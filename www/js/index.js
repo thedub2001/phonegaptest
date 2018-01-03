@@ -63,6 +63,7 @@ var app = {
         disconnectButton.addEventListener('touchstart', this.disconnect, false);
         prepareDataButton.addEventListener('touchstart', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
+        writeFile.addEventListener("click", writeFile);
     },
     onDeviceReady: function() {
         app.refreshDeviceList();
@@ -127,14 +128,6 @@ var app = {
         //create(stringArray, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(20000);
         lastIndex=0;
-
-        var hiddenElement = document.createElement('a');
-
-        hiddenElement.href = 'data:attachment/text,' + encodeURI(stringArray);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = 'myFile.txt';
-        hiddenElement.click();
-
     },
     sendData: function(event) { // send data to Arduino
 
