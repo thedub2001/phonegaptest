@@ -103,7 +103,7 @@ var app = {
         disconnectButton.addEventListener('touchstart', this.disconnect, false);
         prepareDataButton.addEventListener('click', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
-        deviceList.addEventListener('requestFsButton', this.requestAndroidFS, false);
+        requestFsButton.addEventListener('click', this.requestAndroidFS, false);
     },
     onDeviceReady: function() {
         app.refreshDeviceList();
