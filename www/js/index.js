@@ -130,7 +130,16 @@ var app = {
         resultDiv.scrollTop = resultDiv.scrollHeight;
 
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
-        resultDiv.innerHTML = resultDiv.innerHTML + "The data: " + stringArray + "<br/>";
+        var myData = "";
+        stringArray.forEach(function(dd) {
+            myData = myData + String.fromCharCode(dd);
+            if (String.fromCharCode(dd) == "$") {
+                myData = myData + "<br/>";
+            }
+        });
+        resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
+        resultDiv.innerHTML = resultDiv.innerHTML + myData;
+
         //create(stringArray, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(29000);
         lastIndex = 0;
