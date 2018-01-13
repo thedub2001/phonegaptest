@@ -56,10 +56,24 @@ var app = {
         this.bindEvents();
         detailPage.hidden = true;
     },
+    bindEvents: function() {
+        document.addEventListener('deviceready', this.onDeviceReady, false);
+        refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
+        sendButton.addEventListener('click', this.sendData, false);
+        disconnectButton.addEventListener('touchstart', this.disconnect, false);
+        prepareDataButton.addEventListener('click', this.prepareData, false);
+        deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
+        requestFsButton.addEventListener('click', this.requestAndroidFS, false);
+    },
+    onDeviceReady: function() {
+        app.refreshDeviceList();
+    },
     requestAndroidFS: function() {
+        resultDiv.innerHTML = resultDiv.innerHTML + "Requesting File System : <br/>";
+
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fs) {
 
-            console.log('file system open: ' + fs.name);
+            //console.log('file system open: ' + fs.name);
             fs.root.getFile("newPersistentFile.txt", { create: true, exclusive: false }, function(fileEntry) {
 
                 //console.log("fileEntry is file?" + fileEntry.isFile.toString());
@@ -77,13 +91,13 @@ var app = {
         fileEntry.createWriter(function(fileWriter) {
 
             fileWriter.onwriteend = function() {
-                console.log("Successful file write...");
+                //console.log("Successful file write...");
                 resultDiv.innerHTML = resultDiv.innerHTML + "Successful file write...<br/>";
                 readFile(fileEntry);
             };
 
             fileWriter.onerror = function(e) {
-                console.log("Failed file write: " + e.toString());
+                //console.log("Failed file write: " + e.toString());
                 resultDiv.innerHTML = resultDiv.innerHTML + "Failed file write: " + e.toString() + "<br/>";
             };
 
@@ -95,18 +109,6 @@ var app = {
 
             fileWriter.write(dataObj);
         });
-    },
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-        refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
-        sendButton.addEventListener('click', this.sendData, false);
-        disconnectButton.addEventListener('touchstart', this.disconnect, false);
-        prepareDataButton.addEventListener('click', this.prepareData, false);
-        deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
-        requestFsButton.addEventListener('click', this.requestAndroidFS, false);
-    },
-    onDeviceReady: function() {
-        app.refreshDeviceList();
     },
     refreshDeviceList: function() {
         deviceList.innerHTML = ''; // empties the list
