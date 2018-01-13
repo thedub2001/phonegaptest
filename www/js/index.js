@@ -119,9 +119,6 @@ var app = {
     onData: function(data) { // data received from Arduino
         var temp = new Uint8Array(data);
         dataBuffer.set(temp, lastIndex);
-        resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + String.fromCharCode(dataBuffer[lastIndex]) + "<br/>";
-        resultDiv.scrollTop = resultDiv.scrollHeight;
-
         lastIndex = temp.length + lastIndex;
 
     },
@@ -140,7 +137,7 @@ var app = {
         resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
         resultDiv.innerHTML = resultDiv.innerHTML + myData;
 
-        //create(stringArray, 'dataPIR.txt', 'text/plain');
+        create(myData, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(29000);
         lastIndex = 0;
         resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
