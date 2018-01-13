@@ -120,6 +120,8 @@ var app = {
         var temp = new Uint8Array(data);
         dataBuffer.set(temp, lastIndex);
         lastIndex = temp.length + lastIndex;
+        resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + data + "<br/>";
+
     },
     prepareData: function(event) { // save data to text file
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
