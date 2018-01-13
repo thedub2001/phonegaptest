@@ -119,7 +119,7 @@ var app = {
     onData: function(data) { // data received from Arduino
         var temp = new Uint8Array(data);
         dataBuffer.set(temp, lastIndex);
-        resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + dataBuffer[lastIndex] + "<br/>";
+        resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + String.fromCharCode(dataBuffer[lastIndex]) + "<br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
 
         lastIndex = temp.length + lastIndex;
