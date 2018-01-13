@@ -34,9 +34,9 @@ function stringToBytes(string) {
 
 function create(text, name, type) {
     var dataButton = document.getElementById("saveDataButton");
-    var file = new Blob([text], { type: type });
-    dataButton.href = URL.createObjectURL(file);
-    dataButton.download = name;
+    dataButton.href = 'data:attachment/text,' + encodeURI(text);
+    dataButton.target = '_blank';
+    dataButton.download = 'myFile.txt';
 }
 
 // this is Nordic's UART service
