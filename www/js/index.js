@@ -33,17 +33,17 @@ function stringToBytes(string) {
 }
 
 function create(text, name, type) {
-  var dataButton = document.getElementById("saveDataButton");
-  var file = new Blob([text], {type: type});
-  dataButton.href = URL.createObjectURL(file);
-  dataButton.download = name;
+    var dataButton = document.getElementById("saveDataButton");
+    var file = new Blob([text], { type: type });
+    dataButton.href = URL.createObjectURL(file);
+    dataButton.download = name;
 }
 
 // this is Nordic's UART service
 var bluefruit = {
     serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
     txCharacteristic: '6e400002-b5a3-f393-e0a9-e50e24dcca9e', // transmit is from the phone's perspective
-    rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e'  // receive is from the phone's perspective
+    rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e' // receive is from the phone's perspective
 };
 
 var dataBuffer = new Uint8Array(29000);
@@ -70,15 +70,15 @@ var app = {
     refreshDeviceList: function() {
         deviceList.innerHTML = ''; // empties the list
         ble.scan([bluefruit.serviceUUID], 5, app.onDiscoverDevice, app.onError);
-        
+
         // if Android can't find your device try scanning for all devices
         // ble.scan([], 5, app.onDiscoverDevice, app.onError);
     },
     onDiscoverDevice: function(device) {
         var listItem = document.createElement('li'),
             html = '<b>' + device.name + '</b><br/>' +
-                'RSSI: ' + device.rssi + '&nbsp;|&nbsp;' +
-                device.id;
+            'RSSI: ' + device.rssi + '&nbsp;|&nbsp;' +
+            device.id;
 
         listItem.dataset.deviceId = device.id;
         listItem.innerHTML = html;
@@ -126,7 +126,7 @@ var app = {
         resultDiv.value = stringArray;
         //create(stringArray, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(29000);
-        lastIndex=0;
+        lastIndex = 0;
     },
     sendData: function(event) { // send data to Arduino
 
