@@ -61,7 +61,7 @@ var app = {
         refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
         sendButton.addEventListener('click', this.sendData, false);
         disconnectButton.addEventListener('touchstart', this.disconnect, false);
-        prepareDataButton.addEventListener('touchstart', this.prepareData, false);
+        prepareDataButton.addEventListener('click', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
     },
     onDeviceReady: function() {
@@ -120,17 +120,23 @@ var app = {
         var temp = new Uint8Array(data);
         dataBuffer.set(temp, lastIndex);
         resultDiv.innerHTML = resultDiv.innerHTML + "Received: " + dataBuffer[lastIndex] + "<br/>";
+        resultDiv.scrollTop = resultDiv.scrollHeight;
+
         lastIndex = temp.length + lastIndex;
 
     },
     prepareData: function(event) { // save data to text file
         resultDiv.innerHTML = resultDiv.innerHTML + "Debut Prepare <br/>";
+        resultDiv.scrollTop = resultDiv.scrollHeight;
+
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
         resultDiv.innerHTML = resultDiv.innerHTML + "The data: " + stringArray + "<br/>";
         //create(stringArray, 'dataPIR.txt', 'text/plain');
         dataBuffer = new Uint8Array(29000);
         lastIndex = 0;
         resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
+        resultDiv.scrollTop = resultDiv.scrollHeight;
+
     },
     sendData: function(event) { // send data to Arduino
 
