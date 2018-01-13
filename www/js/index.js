@@ -56,6 +56,46 @@ var app = {
         this.bindEvents();
         detailPage.hidden = true;
     },
+    requestAndroidFS: function() {
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fs) {
+
+            console.log('file system open: ' + fs.name);
+            fs.root.getFile("newPersistentFile.txt", { create: true, exclusive: false }, function(fileEntry) {
+
+                //console.log("fileEntry is file?" + fileEntry.isFile.toString());
+                resultDiv.innerHTML = resultDiv.innerHTML + "fileEntry is file?" + fileEntry.isFile.toString() + "<br/>";
+                // fileEntry.name == 'someFile.txt'
+                // fileEntry.fullPath == '/someFile.txt'
+                this.writeFile(fileEntry, null);
+
+            }, onErrorCreateFile);
+
+        }, onErrorLoadFs);
+    },
+    writeFile: function(fileEntry, dataObj) {
+        // Create a FileWriter object for our FileEntry (log.txt).
+        fileEntry.createWriter(function(fileWriter) {
+
+            fileWriter.onwriteend = function() {
+                console.log("Successful file write...");
+                resultDiv.innerHTML = resultDiv.innerHTML + "Successful file write...<br/>";
+                readFile(fileEntry);
+            };
+
+            fileWriter.onerror = function(e) {
+                console.log("Failed file write: " + e.toString());
+                resultDiv.innerHTML = resultDiv.innerHTML + "Failed file write: " + e.toString() + "<br/>";
+            };
+
+            // If data object is not passed in,
+            // create a new Blob instead.
+            if (!dataObj) {
+                dataObj = new Blob(['some file data'], { type: 'text/plain' });
+            }
+
+            fileWriter.write(dataObj);
+        });
+    },
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
         refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
@@ -63,6 +103,7 @@ var app = {
         disconnectButton.addEventListener('touchstart', this.disconnect, false);
         prepareDataButton.addEventListener('click', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
+        deviceList.addEventListener('requestFsButton', this.requestAndroidFS, false);
     },
     onDeviceReady: function() {
         app.refreshDeviceList();
