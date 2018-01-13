@@ -68,23 +68,27 @@ var app = {
     onDeviceReady: function() {
         app.refreshDeviceList();
     },
+    debugLog: function(string) {
+        resultDiv.innerHTML = resultDiv.innerHTML + string + " <br/>";
+    },
     requestAndroidFS: function() {
-        resultDiv.innerHTML = resultDiv.innerHTML + "Requesting File System : <br/>";
-
+        this.debugLog("Requesting File System");
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fs) {
+            this.debugLog("Requesting File System : OK");
+            this.debugLog("File is : " + fs.name);
 
             //console.log('file system open: ' + fs.name);
             fs.root.getFile("newPersistentFile.txt", { create: true, exclusive: false }, function(fileEntry) {
 
                 //console.log("fileEntry is file?" + fileEntry.isFile.toString());
-                resultDiv.innerHTML = resultDiv.innerHTML + "fileEntry is file?" + fileEntry.isFile.toString() + "<br/>";
-                // fileEntry.name == 'someFile.txt'
-                // fileEntry.fullPath == '/someFile.txt'
+                this.debugLog("fileEntry is file?" + fileEntry.isFile.toString())
+                    // fileEntry.name == 'someFile.txt'
+                    // fileEntry.fullPath == '/someFile.txt'
                 this.writeFile(fileEntry, null);
 
-            }, onErrorCreateFile);
+            }, this.debugLog("Error getFile"));
 
-        }, onErrorLoadFs);
+        }, this.debugLog("Error Get FS"));
     },
     writeFile: function(fileEntry, dataObj) {
         // Create a FileWriter object for our FileEntry (log.txt).
