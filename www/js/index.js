@@ -17,6 +17,23 @@
 /* global ble  */
 /* jshint browser: true , devel: true*/
 'use strict';
+
+
+
+function onSuccess(position) {
+    var element = document.getElementById('geolocation');
+    element.innerHTML = 'Latitude: ' + position.coords.latitude + '<br />' +
+        'Longitude: ' + position.coords.longitude + '<br />' +
+        'Timestamp: ' + new Date(position.timestamp) + '<br />';
+}
+
+// onError Callback receives a [PositionError](../PositionError/positionError.html) object
+//
+function onErrorG(error) {
+    alert('code: ' + error.code + '\n' +
+        'message: ' + error.message + '\n');
+}
+
 var allDatas = "";
 // ASCII only
 function bytesToString(buffer) {
@@ -73,7 +90,7 @@ function writeFile(fileEntry, dataObj) {
             readFile(fileEntry);
         };
 
-        fileWriter.onerror = function(e) {
+        fileWriter.G = function(e) {
             //console.log("Failed file write: " + e.toString());
             resultDiv.innerHTML = resultDiv.innerHTML + "Failed file write: " + e.toString() + "<br/>";
         };
@@ -95,7 +112,7 @@ function readFile(fileEntry) {
 
         reader.onloadend = function() {
             console.log("Successful file read: " + this.result);
-            debugLog(fileEntry.fullPath + ": " + this.result);
+            debugLog(fileEntry.fullPath + " as been written");
         };
 
         reader.readAsText(file);
@@ -104,6 +121,10 @@ function readFile(fileEntry) {
 
     }, debugLog("read done"));
 }
+
+var httpd = null;
+var myBle = {};
+myBle.data = 300000;
 
 var app = {
 
@@ -116,7 +137,7 @@ var app = {
         document.addEventListener('deviceready', this.onDeviceReady, false);
         refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
         sendButton.addEventListener('click', this.sendData, false);
-        disconnectButton.addEventListener('touchstart', this.disconnect, false);
+        disconnectButton.addEventListener('click', this.disconnect, false);
         prepareDataButton.addEventListener('click', this.prepareData, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
         requestFsButton.addEventListener('click', this.requestAndroidFS, false);
@@ -124,6 +145,28 @@ var app = {
     onDeviceReady: function() {
         app.refreshDeviceList();
         console.log(cordova.file.applicationDirectory);
+        navigator.geolocation.getCurrentPosition(onSuccess, onErrorG);
+        webserver.onRequest(
+            function(request) {
+                console.log("O MA GAWD! This is the request: ", request);
+
+                webserver.sendResponse(
+                    request.requestId, {
+                        status: 200,
+                        body: '<html>Hello World</html>',
+                        headers: {
+                            'Content-Type': 'text/html'
+                        }
+                    }
+                );
+            }
+        );
+
+        webserver.start();
+
+        //... after a long long time
+        // stop the server
+
     },
     requestAndroidFS: function() {
         debugLog("Requesting File System");
@@ -137,6 +180,7 @@ var app = {
     refreshDeviceList: function() {
         deviceList.innerHTML = ''; // empties the list
         ble.scan([bluefruit.serviceUUID], 5, app.onDiscoverDevice, app.onError);
+        navigator.geolocation.getCurrentPosition(onSuccess, onErrorG);
 
         // if Android can't find your device try scanning for all devices
         // ble.scan([], 5, app.onDiscoverDevice, app.onError);
@@ -163,6 +207,7 @@ var app = {
                 disconnectButton.dataset.deviceId = deviceId;
                 resultDiv.innerHTML = "";
                 app.showDetailPage();
+
             };
 
         ble.connect(deviceId, onConnect, app.onError);
@@ -188,17 +233,17 @@ var app = {
 
         var temp = new Uint8Array(data);
         dataBuffer.set(temp, lastIndex);
-        /*if (dataBuffer.indexOf(35) != -1) {
-            debugLog("end of transmission de ouf");
+        if (dataBuffer.indexOf(35) != -1) {
+            //debugLog("end of transmission de ouf");
             app.prepareData();
-        }*/
+        }
         ligness.innerHTML = lastIndex;
-        progressVal.value = 100 * (lastIndex / 300000);
+        progressVal.value = 100 * (lastIndex / myBle.data);
         lastIndex = temp.length + lastIndex;
 
     },
     prepareData: function(event) { // save data to text file
-        resultDiv.innerHTML = resultDiv.innerHTML + "Debut Prepare <br/>";
+        //resultDiv.innerHTML = resultDiv.innerHTML + "Debut Prepare <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
 
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
@@ -206,21 +251,72 @@ var app = {
         stringArray.forEach(function(dd) {
             myData = myData + String.fromCharCode(dd);
             if (String.fromCharCode(dd) == "$") {
-                myData = myData + "\n";
+                if (messageInput.value != "Infos") {
+                    myData = myData + "\n";
+                }
             }
         });
         stringArray = [];
-        allDatas = myData;
-        //resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
-        //resultDiv.innerHTML = resultDiv.innerHTML + myData;
-        myData = "";
         dataBuffer = new Uint8Array(300000);
         lastIndex = 0;
         ligness.innerHTML = lastIndex;
         progressVal.value = 0;
-        resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
+        //resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
+        if (messageInput.value == "Infos") {
+            var result = [];
+            var infoss = myData.split('$');
+            infoss.forEach(function(line) {
+                if (line.indexOf("#") != -1) {} else {
+                    var isStar = line.indexOf("*");
+                    line = line.substring(isStar + 1);
+                    var arr = line.split(',');
 
+                    result.push(arr);
+                }
+
+            });
+            result.forEach(function(ll) {
+                debugLog(ll[0] + " is : " + ll[1]);
+                if (ll[0] == "name") {
+                    myBle.name = ll[1];
+                    bleName.innerHTML = myBle.name;
+                }
+                if (ll[0] == "date") {
+                    myBle.date = ll[1];
+                }
+                if (ll[0] == "time") {
+                    myBle.time = ll[1];
+                }
+                if (ll[0] == "temp") {
+                    myBle.temp = ll[1];
+                }
+                if (ll[0] == "voltage") {
+                    myBle.voltage = ll[1];
+                }
+                if (ll[0] == "data") {
+                    myBle.data = Number(ll[1]) * 12;
+                }
+
+            });
+        } else {
+            allDatas = myData;
+            app.requestAndroidFS();
+        }
+        //resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
+        //resultDiv.innerHTML = resultDiv.innerHTML + myData;
+        myData = "";
+
+
+
+    },
+    askInfos: function(event) {
+        messageInput.value = "Infos";
+        app.sendData();
+    },
+    askAllDatas: function(event) {
+        messageInput.value = "Send";
+        app.sendData();
     },
     sendData: function(event) { // send data to Arduino
 
@@ -257,6 +353,7 @@ var app = {
     disconnect: function(event) {
         var deviceId = event.target.dataset.deviceId;
         ble.disconnect(deviceId, app.showMainPage, app.onError);
+        webserver.stop();
     },
     showMainPage: function() {
         mainPage.hidden = false;
