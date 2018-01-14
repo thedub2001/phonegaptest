@@ -237,8 +237,9 @@ var app = {
             //debugLog("end of transmission de ouf");
             app.prepareData();
         }
-        ligness.innerHTML = lastIndex;
+        ligness.innerHTML = lastIndex / 1000;
         progressVal.value = 100 * (lastIndex / myBle.data);
+        ligness.innerHTML = 100 * (lastIndex / myBle.data);
         lastIndex = temp.length + lastIndex;
 
     },
@@ -300,7 +301,30 @@ var app = {
 
             });
         } else {
-            allDatas = myData;
+            var liness = myData.split("$");
+            var result = [];
+            liness.forEach(function(line) {
+                if (line.indexOf("#") != -1) {} else {
+                    var isStar = line.indexOf("*");
+                    line = line.substring(isStar + 1);
+                    var time = parseInt(line.substring(0, 5), 16);
+                    var gauche = parseInt(line.substring(5, 7), 16);
+                    var droite = parseInt(line.substring(7, 9), 16);
+                    var theArr = [];
+                    theArr.push(time);
+                    theArr.push(gauche);
+                    theArr.push(droite);
+                    result.push(theArr);
+                }
+
+            });
+            allDatas = 'time,gauche,droite\n';
+            result.forEach(function(rr) {
+                if (!isNaN(rr[0]) && rr[0] != 1048575) {
+                    allDatas = allDatas + rr[0] + ',' + rr[1] + ',' + rr[2] + '\n';
+                }
+
+            });
             app.requestAndroidFS();
         }
         //resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
