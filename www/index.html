@@ -7,37 +7,63 @@
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1,  target-densitydpi=device-dpi" />
 
     <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" href="css/onsenui.css">
+    <link rel="stylesheet" href="css/onsen-css-components.min.css">
+    <script src="js/onsenui.min.js"></script>
     <title>BluefruitLE</title>
 </head>
+<ons-page>
 
-<body>
-    <div class="app">
-        <h1>Bluetooth Connect</h1>
-        <div id="mainPage">
-            <ul id="deviceList">
-            </ul>
-            <button id="refreshButton">Refresh</button>
-        </div>
-        <div id="detailPage">
-            <div>
-                <pre id="resultDiv"></pre>
+    <body>
+        <div class="app">
+            <div class="toolbar">
+                <div class="toolbar__center">Bluetooth App</div>
             </div>
-            <div>
-                <input type="text" id="messageInput" value="Infos" />
-                <button id="sendButton">Send</button>
-            </div>
-            <button id="disconnectButton">Disconnect</button>
-            <button id="prepareDataButton">prepareData</button>
-            <button id="requestFsButton">FileSystem</button>
-            <button id="saveFileButton">saveFile</button>
+            <div id="mainPage">
+                <ul class="list list--material" id="deviceList">
 
+                </ul>
+
+
+                <div class="toast toast--material">
+                    <div class="toast__message toast--material__message">Refresh Bluetooth List</div>
+                    <button id="refreshButton" class="toast__button toast--material__button">Refresh</button>
+                </div>
+
+
+
+
+
+            </div>
+            <div id="detailPage">
+                <div>
+                    <pre id="resultDiv"></pre>
+                </div>
+                <div>
+                    <input type="text" class="text-input" id="messageInput" value="Infos" />
+                </div>
+
+
+
+                <div class="toast toast--material">
+                    <button id="sendButton" class="toast__button toast--material__button">Send</button>
+                    <div class="toast__message toast--material__message"></div>
+                    <button id="prepareDataButton" class="toast__button toast--material__button">Prepare</button>
+                    <div class="toast__message toast--material__message"></div>
+                    <button id="requestFsButton" class="toast__button toast--material__button">Save</button>
+                    <div class="toast__message toast--material__message"></div>
+                    <button id="disconnectButton" class="toast__button toast--material__button">Exit</button>
+                </div>
+
+
+            </div>
         </div>
-    </div>
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript">
-        app.initialize();
-    </script>
-</body>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript">
+            app.initialize();
+        </script>
+    </body>
+</ons-page>
 
 </html>

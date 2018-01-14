@@ -149,6 +149,7 @@ var app = {
 
         listItem.dataset.deviceId = device.id;
         listItem.innerHTML = html;
+        listItem.class = "list-item list-item--tappable";
         deviceList.appendChild(listItem);
     },
     connect: function(e) {
