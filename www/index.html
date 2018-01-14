@@ -17,7 +17,9 @@
     <body>
         <div class="app">
             <div class="toolbar">
-                <div class="toolbar__center">Bluetooth App</div>
+                <div class="toolbar__center">Bluetooth App
+                    <ons-fab id="ligness"></ons-fab>
+                </div>
             </div>
             <div id="mainPage">
                 <ul class="list list--material" id="deviceList">
@@ -36,12 +38,17 @@
 
             </div>
             <div id="detailPage">
+                <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
                 <div>
-                    <pre id="resultDiv"></pre>
+                    <pre id="resultDiv" ripple></pre>
                 </div>
+
+
                 <div>
                     <input type="text" class="text-input" id="messageInput" value="Infos" />
+
                 </div>
+
 
 
 

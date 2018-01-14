@@ -17,7 +17,7 @@
 /* global ble  */
 /* jshint browser: true , devel: true*/
 'use strict';
-
+var allDatas = "";
 // ASCII only
 function bytesToString(buffer) {
     return String.fromCharCode.apply(null, new Uint8Array(buffer));
@@ -50,7 +50,7 @@ var bluefruit = {
     rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e' // receive is from the phone's perspective
 };
 
-var dataBuffer = new Uint8Array(29000);
+var dataBuffer = new Uint8Array(300000);
 var lastIndex = 0;
 
 function createFile(dirEntry, fileName, isAppend) {
@@ -81,9 +81,9 @@ function writeFile(fileEntry, dataObj) {
         // If data object is not passed in,
         // create a new Blob instead.
         if (!dataObj) {
-            dataObj = new Blob([resultDiv.innerHTML], { type: 'text/plain' });
+            dataObj = new Blob([allDatas], { type: 'text/plain' });
         }
-
+        allDatas = "";
         fileWriter.write(dataObj);
     });
 };
@@ -185,8 +185,15 @@ var app = {
 
     },
     onData: function(data) { // data received from Arduino
+
         var temp = new Uint8Array(data);
         dataBuffer.set(temp, lastIndex);
+        /*if (dataBuffer.indexOf(35) != -1) {
+            debugLog("end of transmission de ouf");
+            app.prepareData();
+        }*/
+        ligness.innerHTML = lastIndex;
+        progressVal.value = 100 * (lastIndex / 300000);
         lastIndex = temp.length + lastIndex;
 
     },
@@ -199,15 +206,18 @@ var app = {
         stringArray.forEach(function(dd) {
             myData = myData + String.fromCharCode(dd);
             if (String.fromCharCode(dd) == "$") {
-                myData = myData + "<br/>";
+                myData = myData + "\n";
             }
         });
         stringArray = [];
-        resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
-        resultDiv.innerHTML = resultDiv.innerHTML + myData;
+        allDatas = myData;
+        //resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
+        //resultDiv.innerHTML = resultDiv.innerHTML + myData;
         myData = "";
-        dataBuffer = new Uint8Array(29000);
+        dataBuffer = new Uint8Array(300000);
         lastIndex = 0;
+        ligness.innerHTML = lastIndex;
+        progressVal.value = 0;
         resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
 
