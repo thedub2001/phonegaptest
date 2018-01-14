@@ -24,6 +24,10 @@ function bytesToString(buffer) {
 }
 
 // ASCII only
+function debugLog(string) {
+    resultDiv.innerHTML = resultDiv.innerHTML + string + " <br/>";
+};
+
 function stringToBytes(string) {
     var array = new Uint8Array(string.length);
     for (var i = 0, l = string.length; i < l; i++) {
@@ -49,6 +53,58 @@ var bluefruit = {
 var dataBuffer = new Uint8Array(29000);
 var lastIndex = 0;
 
+function createFile(dirEntry, fileName, isAppend) {
+    // Creates a new file or returns the file if it already exists.
+    dirEntry.getFile(fileName, { create: true, exclusive: false }, function(fileEntry) {
+
+        writeFile(fileEntry, null, isAppend);
+
+    }, debugLog("File created done"));
+
+}
+
+function writeFile(fileEntry, dataObj) {
+    // Create a FileWriter object for our FileEntry (log.txt).
+    fileEntry.createWriter(function(fileWriter) {
+
+        fileWriter.onwriteend = function() {
+            //console.log("Successful file write...");
+            resultDiv.innerHTML = resultDiv.innerHTML + "Successful file write...<br/>";
+            readFile(fileEntry);
+        };
+
+        fileWriter.onerror = function(e) {
+            //console.log("Failed file write: " + e.toString());
+            resultDiv.innerHTML = resultDiv.innerHTML + "Failed file write: " + e.toString() + "<br/>";
+        };
+
+        // If data object is not passed in,
+        // create a new Blob instead.
+        if (!dataObj) {
+            dataObj = new Blob([resultDiv.innerHTML], { type: 'text/plain' });
+        }
+
+        fileWriter.write(dataObj);
+    });
+};
+
+function readFile(fileEntry) {
+
+    fileEntry.file(function(file) {
+        var reader = new FileReader();
+
+        reader.onloadend = function() {
+            console.log("Successful file read: " + this.result);
+            debugLog(fileEntry.fullPath + ": " + this.result);
+        };
+
+        reader.readAsText(file);
+
+
+
+    }, debugLog("read done"));
+}
+
 var app = {
 
 
@@ -67,53 +123,17 @@ var app = {
     },
     onDeviceReady: function() {
         app.refreshDeviceList();
-    },
-    debugLog: function(string) {
-        resultDiv.innerHTML = resultDiv.innerHTML + string + " <br/>";
+        console.log(cordova.file.applicationDirectory);
     },
     requestAndroidFS: function() {
-        this.debugLog("Requesting File System");
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fs) {
-            this.debugLog("Requesting File System : OK");
-            this.debugLog("File is : " + fs.name);
-
-            //console.log('file system open: ' + fs.name);
-            fs.root.getFile("newPersistentFile.txt", { create: true, exclusive: false }, function(fileEntry) {
-
-                //console.log("fileEntry is file?" + fileEntry.isFile.toString());
-                this.debugLog("fileEntry is file?" + fileEntry.isFile.toString())
-                    // fileEntry.name == 'someFile.txt'
-                    // fileEntry.fullPath == '/someFile.txt'
-                this.writeFile(fileEntry, null);
-
-            }, this.debugLog("Error getFile"));
-
-        }, this.debugLog("Error Get FS"));
+        debugLog("Requesting File System");
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
+            console.log('file system open: ' + dirEntry.name);
+            var isAppend = true;
+            createFile(dirEntry, "fileToAppend.txt", isAppend);
+        }, debugLog("Fs done"));
     },
-    writeFile: function(fileEntry, dataObj) {
-        // Create a FileWriter object for our FileEntry (log.txt).
-        fileEntry.createWriter(function(fileWriter) {
 
-            fileWriter.onwriteend = function() {
-                //console.log("Successful file write...");
-                resultDiv.innerHTML = resultDiv.innerHTML + "Successful file write...<br/>";
-                readFile(fileEntry);
-            };
-
-            fileWriter.onerror = function(e) {
-                //console.log("Failed file write: " + e.toString());
-                resultDiv.innerHTML = resultDiv.innerHTML + "Failed file write: " + e.toString() + "<br/>";
-            };
-
-            // If data object is not passed in,
-            // create a new Blob instead.
-            if (!dataObj) {
-                dataObj = new Blob(['some file data'], { type: 'text/plain' });
-            }
-
-            fileWriter.write(dataObj);
-        });
-    },
     refreshDeviceList: function() {
         deviceList.innerHTML = ''; // empties the list
         ble.scan([bluefruit.serviceUUID], 5, app.onDiscoverDevice, app.onError);
@@ -181,10 +201,10 @@ var app = {
                 myData = myData + "<br/>";
             }
         });
+        stringArray = [];
         resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
         resultDiv.innerHTML = resultDiv.innerHTML + myData;
-
-        create(myData, 'dataPIR.txt', 'text/plain');
+        myData = "";
         dataBuffer = new Uint8Array(29000);
         lastIndex = 0;
         resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
@@ -202,8 +222,8 @@ var app = {
         var failure = function() {
             alert("Failed writing data to the bluefruit le");
         };
-
-        var data = stringToBytes(messageInput.value);
+        var messagee = "*kD0%mspEl," + messageInput.value + "$";
+        var data = stringToBytes(messagee);
         var deviceId = event.target.dataset.deviceId;
 
         if (app.writeWithoutResponse) {
