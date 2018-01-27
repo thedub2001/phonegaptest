@@ -264,7 +264,7 @@ var app = {
         progressVal.value = 0;
         //resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
-        if (messageInput.value == "Infos") {
+        if (messageInput.value == "infos") {
             var result = [];
             var infoss = myData.split('$');
             infoss.forEach(function(line) {
