@@ -201,7 +201,6 @@ function myDecode(base62String) {
     return val;
 };
 
-var httpd = null;
 var myBle = {};
 myBle.data = 300000;
 var myEvent;
@@ -233,7 +232,7 @@ var app = {
         }, 1000);
 
         httpd = (cordova && cordova.plugins && cordova.plugins.CorHttpd) ? cordova.plugins.CorHttpd : null;
-        startServer("css");
+        startServer("/");
 
 
 
