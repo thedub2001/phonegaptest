@@ -546,12 +546,14 @@ var app = {
 
     },
     askInfos: function(event) {
+        dataBuffer = new Uint8Array(300000);
         requested = "infos";
         console.log("Asking Infos...");
         var dataToSend = "*kD0%mspEl,infos$";
         app.sendData(dataToSend);
     },
     askAllDatas: function(event) {
+        dataBuffer = new Uint8Array(300000);
         requested = "sendAll";
         console.log("Asking All Datas...");
         var dataToSend = "*kD0%mspEl,sendAll$";
@@ -564,6 +566,7 @@ var app = {
         app.sendData(dataToSend);
     },
     sendCommand: function(event) {
+        dataBuffer = new Uint8Array(300000);
         requested = 'sendAll2';
         var pp = messageInput.value.split(',');
         var dataToSend2 = '*kD0%mspEl';
