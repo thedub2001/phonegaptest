@@ -26,12 +26,15 @@ var lastyl = 0;
 var lastym = 0;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+var modal = document.querySelector('ons-modal');
+var posX;
+var posY;
 
 function onSuccess(position) {
-    var element = document.getElementById('geolocation');
-    element.innerHTML = 'Latitude: ' + position.coords.latitude + '<br />' +
-        'Longitude: ' + position.coords.longitude + '<br />' +
-        'Timestamp: ' + new Date(position.timestamp) + '<br />';
+    posX = position.coords.latitude;
+    posY = position.coords.longitude;
+    var theTime = document.getElementById('theTime');
+    theTime.innerHTML = new Date(position.timestamp).getHours() + ":" + new Date(position.timestamp).getMinutes() + ":" + new Date(position.timestamp).getSeconds();
 }
 
 // onError Callback receives a [PositionError](../PositionError/positionError.html) object
@@ -168,7 +171,10 @@ var app = {
     onDeviceReady: function() {
         app.refreshDeviceList();
         console.log(cordova.file.applicationDirectory);
-        navigator.geolocation.getCurrentPosition(onSuccess, onErrorG);
+        setInterval(function() {
+            navigator.geolocation.getCurrentPosition(onSuccess, onErrorG);
+            //code goes here that will be run every 5 seconds.    
+        }, 1000);
         webserver.onRequest(
             function(request) {
                 console.log("O MA GAWD! This is the request: ", request);
@@ -203,7 +209,7 @@ var app = {
     refreshDeviceList: function() {
         deviceList.innerHTML = ''; // empties the list
         ble.scan([bluefruit.serviceUUID], 5, app.onDiscoverDevice, app.onError);
-        navigator.geolocation.getCurrentPosition(onSuccess, onErrorG);
+
 
         // if Android can't find your device try scanning for all devices
         // ble.scan([], 5, app.onDiscoverDevice, app.onError);
@@ -384,6 +390,8 @@ var app = {
                 app.prepareData();
             }
             progressVal.value = 100 * (lastIndex / myBle.data);
+            var percent = document.getElementById("percent");
+            percent.innerHTML = Math.round(100 * (lastIndex / myBle.data)) + "%";
             lastIndex = temp.length + lastIndex;
 
         }
@@ -439,6 +447,7 @@ var app = {
                 debugLog(ll[0] + " is : " + ll[1]);
                 if (ll[0] == "name") {
                     myBle.name = ll[1];
+                    blePos.innerHTML = posX + " " + posY;
                     bleName.innerHTML = myBle.name;
                 }
                 if (ll[0] == "date") {
@@ -446,6 +455,9 @@ var app = {
                 }
                 if (ll[0] == "time") {
                     myBle.time = ll[1];
+                    var theTimeb = document.getElementById('theTimeb');
+                    theTimeb.innerHTML = myBle.time;
+                    console.log(myBle.time);
                 }
                 if (ll[0] == "temp") {
                     myBle.temp = ll[1];
@@ -541,6 +553,7 @@ var app = {
         //resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
         //resultDiv.innerHTML = resultDiv.innerHTML + myData;
         myData = "";
+        modal.hide();
 
 
 
@@ -553,6 +566,8 @@ var app = {
         app.sendData(dataToSend);
     },
     askAllDatas: function(event) {
+
+        modal.show();
         dataBuffer = new Uint8Array(300000);
         requested = "sendAll";
         console.log("Asking All Datas...");
