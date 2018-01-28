@@ -29,6 +29,7 @@ var ctx = canvas.getContext("2d");
 var modal = document.querySelector('ons-modal');
 var posX;
 var posY;
+var httpd = null;
 
 function onSuccess(position) {
     posX = position.coords.latitude;
@@ -175,6 +176,39 @@ var app = {
             navigator.geolocation.getCurrentPosition(onSuccess, onErrorG);
             //code goes here that will be run every 5 seconds.    
         }, 1000);
+
+        httpd = (cordova && cordova.plugins && cordova.plugins.CorHttpd) ? cordova.plugins.CorHttpd : null;
+
+        if (httpd) {
+            // before start, check whether its up or not
+            httpd.getURL(function(url) {
+                if (url.length > 0) {
+                    document.getElementById('url').innerHTML = "server is up: <a href='" + url + "' target='_blank'>" + url + "</a>";
+                } else {
+                    /* wwwroot is the root dir of web server, it can be absolute or relative path
+                     * if a relative path is given, it will be relative to cordova assets/www/ in APK.
+                     * "", by default, it will point to cordova assets/www/, it's good to use 'htdocs' for 'www/htdocs'
+                     * if a absolute path is given, it will access file system.
+                     * "/", set the root dir as the www root, it maybe a security issue, but very powerful to browse all dir
+                     */
+                    httpd.startServer({
+                        'www_root': wwwroot,
+                        'port': 8080,
+                        'localhost_only': false
+                    }, function(url) {
+                        // if server is up, it will return the url of http://<server ip>:port/
+                        // the ip is the active network connection
+                        // if no wifi or no cell, "127.0.0.1" will be returned.
+                        document.getElementById('url').innerHTML = "server is started: <a href='" + url + "' target='_blank'>" + url + "</a>";
+                    }, function(error) {
+                        document.getElementById('url').innerHTML = 'failed to start server: ' + error;
+                    });
+                }
+
+            });
+        } else {
+            alert('CorHttpd plugin not available/ready.');
+        }
         webserver.onRequest(
             function(request) {
                 console.log("O MA GAWD! This is the request: ", request);
@@ -191,7 +225,7 @@ var app = {
             }
         );
 
-        webserver.start();
+        webserver.start(9000);
 
         //... after a long long time
         // stop the server
