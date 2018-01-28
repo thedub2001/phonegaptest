@@ -31,6 +31,61 @@ var posX;
 var posY;
 var httpd = null;
 
+
+function updateStatus() {
+    document.getElementById('location').innerHTML = "document.location.href: " + document.location.href;
+    if (httpd) {
+        httpd.getURL(function(url) {
+            if (url.length > 0) {
+                document.getElementById('url').innerHTML = "server is up: <a href='" + url + "' target='_blank'>" + url + "</a>";
+            } else {
+                document.getElementById('url').innerHTML = "server is down.";
+            }
+        });
+        httpd.getLocalPath(function(path) {
+            document.getElementById('localpath').innerHTML = "<br/>localPath: " + path;
+        });
+    } else {
+        alert('CorHttpd plugin not available/ready.');
+    }
+}
+
+function startServer(wwwroot) {
+    if (httpd) {
+        httpd.getURL(function(url) {
+            if (url.length > 0) {
+                document.getElementById('url').innerHTML = "server is up: <a href='" + url + "' target='_blank'>" + url + "</a>";
+            } else {
+                httpd.startServer({
+                    'www_root': wwwroot,
+                    'port': 8080
+                }, function(url) {
+                    //document.getElementById('url').innerHTML = "server is started: <a href='" + url + "' target='_blank'>" + url + "</a>";
+                    updateStatus();
+                }, function(error) {
+                    document.getElementById('url').innerHTML = 'failed to start server: ' + error;
+                });
+            }
+
+        }, function() {});
+    } else {
+        alert('CorHttpd plugin not available/ready.');
+    }
+}
+
+function stopServer() {
+    if (httpd) {
+        httpd.stopServer(function() {
+            //document.getElementById('url').innerHTML = 'server is stopped.';
+            updateStatus();
+        }, function(error) {
+            document.getElementById('url').innerHTML = 'failed to stop server' + error;
+        });
+    } else {
+        alert('CorHttpd plugin not available/ready.');
+    }
+}
+
 function onSuccess(position) {
     posX = position.coords.latitude;
     posY = position.coords.longitude;
@@ -178,54 +233,9 @@ var app = {
         }, 1000);
 
         httpd = (cordova && cordova.plugins && cordova.plugins.CorHttpd) ? cordova.plugins.CorHttpd : null;
+        startServer("css");
 
-        if (httpd) {
-            // before start, check whether its up or not
-            httpd.getURL(function(url) {
-                if (url.length > 0) {
-                    document.getElementById('url').innerHTML = "server is up: <a href='" + url + "' target='_blank'>" + url + "</a>";
-                } else {
-                    /* wwwroot is the root dir of web server, it can be absolute or relative path
-                     * if a relative path is given, it will be relative to cordova assets/www/ in APK.
-                     * "", by default, it will point to cordova assets/www/, it's good to use 'htdocs' for 'www/htdocs'
-                     * if a absolute path is given, it will access file system.
-                     * "/", set the root dir as the www root, it maybe a security issue, but very powerful to browse all dir
-                     */
-                    httpd.startServer({
-                        'www_root': wwwroot,
-                        'port': 8080,
-                        'localhost_only': false
-                    }, function(url) {
-                        // if server is up, it will return the url of http://<server ip>:port/
-                        // the ip is the active network connection
-                        // if no wifi or no cell, "127.0.0.1" will be returned.
-                        document.getElementById('url').innerHTML = "server is started: <a href='" + url + "' target='_blank'>" + url + "</a>";
-                    }, function(error) {
-                        document.getElementById('url').innerHTML = 'failed to start server: ' + error;
-                    });
-                }
 
-            });
-        } else {
-            alert('CorHttpd plugin not available/ready.');
-        }
-        webserver.onRequest(
-            function(request) {
-                console.log("O MA GAWD! This is the request: ", request);
-
-                webserver.sendResponse(
-                    request.requestId, {
-                        status: 200,
-                        body: '<html>Hello World</html>',
-                        headers: {
-                            'Content-Type': 'text/html'
-                        }
-                    }
-                );
-            }
-        );
-
-        webserver.start(9000);
 
         //... after a long long time
         // stop the server
@@ -708,7 +718,6 @@ var app = {
         app.sendData(dataToSend);
         var deviceId = event.target.dataset.deviceId;
         ble.disconnect(deviceId, app.showMainPage, app.onError);
-        webserver.stop();
     },
     showMainPage: function() {
         mainPage.hidden = false;
