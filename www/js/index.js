@@ -18,7 +18,11 @@
 /* jshint browser: true , devel: true*/
 'use strict';
 
+var requested = "";
+var x = 0;
 
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
 
 function onSuccess(position) {
     var element = document.getElementById('geolocation');
@@ -111,7 +115,7 @@ function readFile(fileEntry) {
         var reader = new FileReader();
 
         reader.onloadend = function() {
-            console.log("Successful file read: " + this.result);
+            //console.log("Successful file read: " + this.result);
             debugLog(fileEntry.fullPath + " as been written");
         };
 
@@ -122,9 +126,23 @@ function readFile(fileEntry) {
     }, debugLog("read done"));
 }
 
+function myDecode(base62String) {
+    var val = 0,
+        i = 0,
+        length = base62String.length,
+        characterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    for (; i < length; i++) {
+        val += characterSet.indexOf(base62String[i]) * Math.pow(62, length - i - 1);
+    }
+
+    return val;
+};
+
 var httpd = null;
 var myBle = {};
 myBle.data = 300000;
+var myEvent;
 
 var app = {
 
@@ -136,10 +154,11 @@ var app = {
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
         refreshButton.addEventListener('touchstart', this.refreshDeviceList, false);
-        sendButton.addEventListener('click', this.sendData, false);
+        sendButton.addEventListener('click', this.askAllDatas, false);
         disconnectButton.addEventListener('click', this.disconnect, false);
-        prepareDataButton.addEventListener('click', this.prepareData, false);
+        infoButton.addEventListener('click', this.askInfos, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
+        commandButton.addEventListener('click', this.sendCommand, false);
         requestFsButton.addEventListener('click', this.requestAndroidFS, false);
     },
     onDeviceReady: function() {
@@ -197,6 +216,7 @@ var app = {
         deviceList.appendChild(listItem);
     },
     connect: function(e) {
+        myEvent = e.target.dataset.deviceId;
         var deviceId = e.target.dataset.deviceId,
             onConnect = function(peripheral) {
                 app.determineWriteType(peripheral);
@@ -231,16 +251,55 @@ var app = {
     },
     onData: function(data) { // data received from Arduino
 
-        var temp = new Uint8Array(data);
-        dataBuffer.set(temp, lastIndex);
-        if (dataBuffer.indexOf(35) != -1) {
-            //debugLog("end of transmission de ouf");
-            app.prepareData();
+
+
+
+        if (requested == "chart") {
+            console.log("reveiving..");
+            var temp = new Uint8Array(data);
+            dataBuffer.set(temp, lastIndex);
+            if (dataBuffer.indexOf(10) != -1) { //Si caractere de fin : #
+                console.log("Write The Line");
+                var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
+                stringArray.forEach(function(dd) {
+                    if (String.fromCharCode(dd) != ",") {
+                        x = x + 1;
+                        if (x >= 200) {
+                            x = 0;
+                            ctx.beginPath();
+                            ctx.rect(0, 0, 200, 100);
+                            ctx.fillStyle = "white";
+                            ctx.fill();
+                        }
+
+
+                        var ii = String.fromCharCode(dd);
+                        console.log(ii);
+                        ctx.moveTo(x, 100);
+                        ctx.lineTo(x, ii);
+                        ctx.stroke();
+                    }
+                });
+                stringArray = [];
+                dataBuffer = new Uint8Array(300000);
+                lastIndex = 0;
+            }
+            progressVal.value = 100 * (lastIndex / myBle.data);
+            lastIndex = temp.length + lastIndex;
+        } else {
+            var temp = new Uint8Array(data);
+            dataBuffer.set(temp, lastIndex);
+            if (dataBuffer.indexOf(35) != -1) { //Si caractere de fin : #
+                debugLog("end of transmission de ouf");
+                app.prepareData();
+            }
+            progressVal.value = 100 * (lastIndex / myBle.data);
+            lastIndex = temp.length + lastIndex;
+
         }
-        ligness.innerHTML = lastIndex / 1000;
-        progressVal.value = 100 * (lastIndex / myBle.data);
-        ligness.innerHTML = 100 * (lastIndex / myBle.data);
-        lastIndex = temp.length + lastIndex;
+
+
+
 
     },
     prepareData: function(event) { // save data to text file
@@ -264,7 +323,8 @@ var app = {
         progressVal.value = 0;
         //resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
-        if (messageInput.value == "infos") {
+
+        if (requested == "infos") {
             var result = [];
             var infoss = myData.split('$');
             infoss.forEach(function(line) {
@@ -296,20 +356,22 @@ var app = {
                     myBle.voltage = ll[1];
                 }
                 if (ll[0] == "data") {
-                    myBle.data = Number(ll[1]) * 12;
+                    myBle.data = Number(ll[1]) * 8;
                 }
 
             });
-        } else {
+            resultDiv.scrollTop = resultDiv.scrollHeight;
+        }
+        if (requested == "sendAll") {
             var liness = myData.split("$");
             var result = [];
             liness.forEach(function(line) {
                 if (line.indexOf("#") != -1) {} else {
                     var isStar = line.indexOf("*");
                     line = line.substring(isStar + 1);
-                    var time = parseInt(line.substring(0, 5), 16);
-                    var gauche = parseInt(line.substring(5, 7), 16);
-                    var droite = parseInt(line.substring(7, 9), 16);
+                    var time = myDecode(line.substring(0, 4));
+                    var gauche = myDecode(line.substring(4, 5));
+                    var droite = myDecode(line.substring(5, 6));
                     var theArr = [];
                     theArr.push(time);
                     theArr.push(gauche);
@@ -320,10 +382,64 @@ var app = {
             });
             allDatas = 'time,gauche,droite\n';
             result.forEach(function(rr) {
-                if (!isNaN(rr[0]) && rr[0] != 1048575) {
+                if (rr[2] != undefined) {
                     allDatas = allDatas + rr[0] + ',' + rr[1] + ',' + rr[2] + '\n';
+                } else {
+                    console.log("Wrong data :");
+                    console.log(rr);
+                }
+            });
+            app.requestAndroidFS();
+        }
+        if (requested == "sendAll2") {
+            console.log("Receiving compressed");
+            var liness = myData.split("$$");
+            var result = [];
+            liness.forEach(function(line) {
+                console.log(line);
+                var dataType = line.split("$");
+                var timeBig = dataType[0];
+                var compressedData = dataType[1];
+                var dLength = dataType[2];
+                console.log("received length:" + dLength);
+                console.log("")
+                for (var jj = 0; jj < dLength; jj++) {
+                    var mm = jj * 4;
+                    myChunk = compressedData.substring(jj, jj + 4);
+                    var isStar = myChunk.indexOf("*");
+                    myChunk = myChunk.substring(isStar + 1);
+                    myChunk = timeBig + myChunk;
+                    var time = myDecode(myChunk.substring(0, 4));
+                    var gauche = myDecode(myChunk.substring(4, 5));
+                    var droite = myDecode(myChunk.substring(5, 6));
+                    var theArr = [];
+                    theArr.push(time);
+                    theArr.push(gauche);
+                    theArr.push(droite);
+                    result.push(theArr);
+                }
+                if (line.indexOf("#") != -1) {} else {
+                    var isStar = line.indexOf("*");
+                    line = line.substring(isStar + 1);
+                    var time = myDecode(line.substring(0, 4));
+                    var gauche = myDecode(line.substring(4, 5));
+                    var droite = myDecode(line.substring(5, 6));
+                    var theArr = [];
+                    theArr.push(time);
+                    theArr.push(gauche);
+                    theArr.push(droite);
+                    result.push(theArr);
                 }
 
+            });
+            allDatas = 'time,gauche,droite\n';
+            result.forEach(function(rr) {
+                if (rr[2] != undefined) {
+                    allDatas = allDatas + rr[0] + ',' + rr[1] + ',' + rr[2] + '\n';
+                } else {
+                    console.log("Wrong data :");
+                    console.log(rr);
+                }
             });
             app.requestAndroidFS();
         }
@@ -335,43 +451,103 @@ var app = {
 
     },
     askInfos: function(event) {
-        messageInput.value = "Infos";
-        app.sendData();
+        requested = "infos";
+        console.log("Asking Infos...");
+        var dataToSend = "*kD0%mspEl,infos$";
+        app.sendData(dataToSend);
     },
     askAllDatas: function(event) {
-        messageInput.value = "Send";
-        app.sendData();
+        requested = "sendAll";
+        console.log("Asking All Datas...");
+        var dataToSend = "*kD0%mspEl,sendAll$";
+        app.sendData(dataToSend);
     },
-    sendData: function(event) { // send data to Arduino
-
+    sendCommand: function(event) {
+        requested = 'sendAll2';
+        var pp = messageInput.value.split(',');
+        var dataToSend2 = '*kD0%mspEl';
+        pp.forEach(function(arg) {
+            dataToSend2 = dataToSend2 + ',' + arg;
+        });
+        dataToSend2 = dataToSend2 + '$';
+        app.sendData(dataToSend2);
+    },
+    sendData: function(dataToSend) { // send data to Arduino
+        console.log("Sending data :");
         var success = function() {
             console.log("success");
-            resultDiv.innerHTML = resultDiv.innerHTML + "Sent: " + messageInput.value + "<br/>";
+            resultDiv.innerHTML = resultDiv.innerHTML + "Sent: " + dataToSend + "<br/>";
             resultDiv.scrollTop = resultDiv.scrollHeight;
         };
 
         var failure = function() {
-            alert("Failed writing data to the bluefruit le");
+            console.log("Failed writing data to the bluefruit le");
         };
-        var messagee = "*kD0%mspEl," + messageInput.value + "$";
-        var data = stringToBytes(messagee);
-        var deviceId = event.target.dataset.deviceId;
+        var messagee = dataToSend;
+        console.log(messagee);
+        var deviceId = myEvent;
 
-        if (app.writeWithoutResponse) {
-            ble.writeWithoutResponse(
-                deviceId,
-                bluefruit.serviceUUID,
-                bluefruit.txCharacteristic,
-                data, success, failure
-            );
+
+
+        if (messagee.length >= 18) {
+            console.log("Message bigger than 18");
+            var arraYofStringss = [];
+            arraYofStringss = messagee.split(",");
+            console.log(arraYofStringss);
+            console.log(arraYofStringss.length);
+            console.log(arraYofStringss[0]);
+            var mleng = arraYofStringss.length;
+            var ml = 0;
+
+            for (var i = 0; i < mleng; i++) {
+                var mm = arraYofStringss[i];
+                if (i != mleng - 1) {
+                    mm = mm + ',';
+                }
+                console.log("will send :");
+                console.log(mm);
+                var data = stringToBytes(mm);
+                if (app.writeWithoutResponse) {
+                    console.log("Write Without response ...");
+                    ble.writeWithoutResponse(
+                        deviceId,
+                        bluefruit.serviceUUID,
+                        bluefruit.txCharacteristic,
+                        data, success, failure
+                    );
+                } else {
+                    console.log("Write...");
+                    ble.write(
+                        deviceId,
+                        bluefruit.serviceUUID,
+                        bluefruit.txCharacteristic,
+                        data, success, failure
+                    );
+                }
+            };
         } else {
-            ble.write(
-                deviceId,
-                bluefruit.serviceUUID,
-                bluefruit.txCharacteristic,
-                data, success, failure
-            );
+            console.log("message smaller than 16");
+            var data = stringToBytes(messagee);
+            if (app.writeWithoutResponse) {
+                console.log("Write Without response ...");
+                ble.writeWithoutResponse(
+                    deviceId,
+                    bluefruit.serviceUUID,
+                    bluefruit.txCharacteristic,
+                    data, success, failure
+                );
+            } else {
+                console.log("Write...");
+                ble.write(
+                    deviceId,
+                    bluefruit.serviceUUID,
+                    bluefruit.txCharacteristic,
+                    data, success, failure
+                );
+            }
         }
+
+
 
     },
     disconnect: function(event) {
