@@ -20,7 +20,10 @@
 
 var requested = "";
 var x = 0;
-
+var lasty = 0;
+var lastyk = 0;
+var lastyl = 0;
+var lastym = 0;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
@@ -159,6 +162,7 @@ var app = {
         infoButton.addEventListener('click', this.askInfos, false);
         deviceList.addEventListener('touchstart', this.connect, false); // assume not scrolling
         commandButton.addEventListener('click', this.sendCommand, false);
+        graphButton.addEventListener('click', this.graphView, false);
         requestFsButton.addEventListener('click', this.requestAndroidFS, false);
     },
     onDeviceReady: function() {
@@ -251,41 +255,127 @@ var app = {
     },
     onData: function(data) { // data received from Arduino
 
+        //console.log(data);
 
 
-
-        if (requested == "chart") {
-            console.log("reveiving..");
+        if (requested == "graph") {
             var temp = new Uint8Array(data);
             dataBuffer.set(temp, lastIndex);
+            lastIndex = temp.length + lastIndex;
             if (dataBuffer.indexOf(10) != -1) { //Si caractere de fin : #
-                console.log("Write The Line");
-                var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
-                stringArray.forEach(function(dd) {
-                    if (String.fromCharCode(dd) != ",") {
-                        x = x + 1;
-                        if (x >= 200) {
-                            x = 0;
-                            ctx.beginPath();
-                            ctx.rect(0, 0, 200, 100);
-                            ctx.fillStyle = "white";
-                            ctx.fill();
+                var myDatas = "";
+                //console.log("eol");
+                //console.log(dataBuffer.length);
+                if (dataBuffer.length < 10000) {
+                    dataBuffer.forEach(function(tt) {
+                        //console.log(tt);
+                        if (tt != 0) {
+                            myDatas = myDatas + String.fromCharCode(tt);
                         }
+                    });
 
-
-                        var ii = String.fromCharCode(dd);
-                        console.log(ii);
-                        ctx.moveTo(x, 100);
-                        ctx.lineTo(x, ii);
-                        ctx.stroke();
+                    //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
+                    var miDa = myDatas.split(",");
+                    //console.log(miDa.length);
+                    //console.log(miDa[2]);
+                    x = x + 1;
+                    if (x >= 400) {
+                        x = 0;
+                        ctx.beginPath();
+                        ctx.rect(0, 0, 400, 600);
+                        ctx.fillStyle = "white";
+                        ctx.fill();
                     }
+
+
+
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, 600 - lasty / 4);
+                    ctx.lineTo(x, 600 - Number(miDa[0]) / 4);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#ff00ff";
+                    ctx.stroke();
+                    lasty = Number(miDa[0]);
+
+
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, 600 - lastyk / 4);
+                    ctx.lineTo(x, 600 - Number(miDa[1]) / 4);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#00ff00";
+                    ctx.stroke();
+                    lastyk = Number(miDa[1]);
+
+
+
+
+
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, 600 - lastyl / 4);
+                    ctx.lineTo(x, 600 - miDa[2] / 4);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#0000ff";
+                    ctx.stroke();
+                    lastyl = miDa[2];
+
+
+                    miDa[3] = miDa[3].substring(0, miDa[3].length - 2);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, 600 - lastym / 4);
+                    ctx.lineTo(x, 600 - Number(miDa[3]) / 4);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#ff0000";
+                    ctx.stroke();
+                    lastym = Number(miDa[3]);
+                    //console.log(myDatas);
+                    //console.log(Number(miDa[0]) + "," + Number(miDa[1]));
+
+                }
+
+                myDatas = "";
+                dataBuffer = new Uint8Array(300);
+                lastIndex = 0;
+            }
+
+            //console.log(myData);
+
+
+            /*
+            var temp = new Uint8Array(data);
+            dataBuffer.set(temp, lastIndex);
+            if (dataBuffer.indexOf(10) != -1) { 
+                var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
+                var myDatass = "";
+                stringArray.forEach(function(tt) {
+                    myDatass = myDatass + String.fromCharCode(tt);
                 });
+
+                var sss = myDatass.split(",");
+                if (sss[0]) {
+                    x = x + 1;
+                    if (x >= 200) {
+                        x = 0;
+                        ctx.beginPath();
+                        ctx.rect(0, 0, 200, 100);
+                        ctx.fillStyle = "white";
+                        ctx.fill();
+                    }
+
+
+                    var ii = sss[0];
+                    ctx.moveTo(x, 100);
+                    ctx.lineTo(x, ii);
+                    ctx.stroke();
+                }
+
                 stringArray = [];
-                dataBuffer = new Uint8Array(300000);
+                dataBuffer = new Uint8Array(600000);
                 lastIndex = 0;
             }
             progressVal.value = 100 * (lastIndex / myBle.data);
             lastIndex = temp.length + lastIndex;
+            */
         } else {
             var temp = new Uint8Array(data);
             dataBuffer.set(temp, lastIndex);
@@ -310,16 +400,24 @@ var app = {
         var myData = "";
         stringArray.forEach(function(dd) {
             myData = myData + String.fromCharCode(dd);
-            if (String.fromCharCode(dd) == "$") {
-                if (messageInput.value != "Infos") {
-                    myData = myData + "\n";
+            if (requested == "sendAll2") {
+                if (String.fromCharCode(dd) == "$$") {
+                    if (messageInput.value != "Infos") {
+                        myData = myData + "\n";
+                    }
+                }
+            } else {
+                if (String.fromCharCode(dd) == "$") {
+                    if (messageInput.value != "Infos") {
+                        myData = myData + "\n";
+                    }
                 }
             }
+
         });
         stringArray = [];
         dataBuffer = new Uint8Array(300000);
         lastIndex = 0;
-        ligness.innerHTML = lastIndex;
         progressVal.value = 0;
         //resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
@@ -393,43 +491,40 @@ var app = {
         }
         if (requested == "sendAll2") {
             console.log("Receiving compressed");
+            myData.replace("#", "");
             var liness = myData.split("$$");
             var result = [];
             liness.forEach(function(line) {
-                console.log(line);
-                var dataType = line.split("$");
-                var timeBig = dataType[0];
-                var compressedData = dataType[1];
-                var dLength = dataType[2];
-                console.log("received length:" + dLength);
-                console.log("")
-                for (var jj = 0; jj < dLength; jj++) {
-                    var mm = jj * 4;
-                    myChunk = compressedData.substring(jj, jj + 4);
-                    var isStar = myChunk.indexOf("*");
-                    myChunk = myChunk.substring(isStar + 1);
-                    myChunk = timeBig + myChunk;
-                    var time = myDecode(myChunk.substring(0, 4));
-                    var gauche = myDecode(myChunk.substring(4, 5));
-                    var droite = myDecode(myChunk.substring(5, 6));
-                    var theArr = [];
-                    theArr.push(time);
-                    theArr.push(gauche);
-                    theArr.push(droite);
-                    result.push(theArr);
+                if (line.indexOf("#") != -1) {
+                    console.log("End Of Transmission");
+                } else {
+                    console.log(line);
+                    var dataType = line.split("$");
+                    var timeBig = dataType[0].substring(1);
+                    var compressedData = dataType[1].substring(1);
+                    var dLength = dataType[2].substring(1);
+                    console.log("received length:" + dLength);
+                    console.log("")
+
+                    for (var jj = 0; jj < dLength; jj++) {
+
+                        var mm = jj * 4;
+                        var myChunk = compressedData.substring(jj, jj + 4);
+                        console.log(myChunk);
+                        var isStar = myChunk.indexOf("*");
+                        myChunk = myChunk.substring(isStar + 1);
+                        myChunk = timeBig + myChunk;
+                        var time = myDecode(myChunk.substring(0, 4));
+                        var gauche = myDecode(myChunk.substring(4, 5));
+                        var droite = myDecode(myChunk.substring(5, 6));
+                        var theArr = [];
+                        theArr.push(time);
+                        theArr.push(gauche);
+                        theArr.push(droite);
+                        result.push(theArr);
+                    }
                 }
-                if (line.indexOf("#") != -1) {} else {
-                    var isStar = line.indexOf("*");
-                    line = line.substring(isStar + 1);
-                    var time = myDecode(line.substring(0, 4));
-                    var gauche = myDecode(line.substring(4, 5));
-                    var droite = myDecode(line.substring(5, 6));
-                    var theArr = [];
-                    theArr.push(time);
-                    theArr.push(gauche);
-                    theArr.push(droite);
-                    result.push(theArr);
-                }
+
 
             });
             allDatas = 'time,gauche,droite\n';
@@ -460,6 +555,12 @@ var app = {
         requested = "sendAll";
         console.log("Asking All Datas...");
         var dataToSend = "*kD0%mspEl,sendAll$";
+        app.sendData(dataToSend);
+    },
+    graphView: function(event) {
+        requested = "graph";
+        console.log("Asking GRaph...");
+        var dataToSend = "*kD0%mspEl,chart,1$";
         app.sendData(dataToSend);
     },
     sendCommand: function(event) {
@@ -551,6 +652,8 @@ var app = {
 
     },
     disconnect: function(event) {
+        var dataToSend = "*kD0%mspEl,chart,0$";
+        app.sendData(dataToSend);
         var deviceId = event.target.dataset.deviceId;
         ble.disconnect(deviceId, app.showMainPage, app.onError);
         webserver.stop();
