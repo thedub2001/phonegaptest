@@ -220,6 +220,7 @@ var app = {
         detailPage.hidden = true;
         myCanvas.hidden = true;
         app.showMainPage();
+        window.plugins.insomnia.keepAwake();
     },
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
@@ -793,6 +794,7 @@ var app = {
         var deviceId = event.target.dataset.deviceId;
         ble.disconnect(deviceId, app.showMainPage, app.onError);
         myCanvas.hidden = true;
+        window.plugins.insomnia.allowSleepAgain();
     },
     showMainPage: function() {
         mainPage.hidden = false;
