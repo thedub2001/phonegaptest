@@ -167,24 +167,26 @@
 
 
             </div>
-            <div id="detailPage">
+            <div id="detailPage" hidden="true">
                 <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
                 <div>
-                    <pre id="resultDiv" ripple></pre>
+                    <pre id="resultDiv" hidden="false" ripple></pre>
                 </div>
 
-                <canvas id="myCanvas" width="400" height="600" style="border:1px solid #c3c3c3;">
+                <canvas id="myCanvas" hidden="true" width="300" height="200" style="border:1px solid #c3c3c3;">
                 </canvas>
+                <ons-range style="width: 100%;" id="zoomViewMin" value="-100"></ons-range>
+                <ons-range style="width: 100%;" id="zoomViewMax" value="1000"></ons-range>
 
 
                 <div>
-                    <input type="text" class="text-input" id="messageInput" value="infos" />
+                    <input type="text" hidden="false" class="text-input" id="messageInput" value="infos" />
                 </div>
 
 
 
 
-                <div class="toast toast--material">
+                <div class="toast toast--material" id="footerPage" hidden="true">
                     <button id="infoButton" class="toast__button toast--material__button">Infos</button>
                     <div class="toast__message toast--material__message"></div>
                     <button id="sendButton" class="toast__button toast--material__button">AsskAll</button>

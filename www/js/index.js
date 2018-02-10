@@ -30,7 +30,12 @@ var modal = document.querySelector('ons-modal');
 var posX;
 var posY;
 var httpd = null;
+var buffLen = 3000000;
+var theMin = 999;
+var theMax = 0;
 
+var rangeMin = document.getElementById('zoomViewMin');
+var rangeMax = document.getElementById('zoomViewMax');
 
 function updateStatus() {
     document.getElementById('location').innerHTML = "document.location.href: " + document.location.href;
@@ -133,7 +138,7 @@ var bluefruit = {
     rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e' // receive is from the phone's perspective
 };
 
-var dataBuffer = new Uint8Array(300000);
+var dataBuffer = new Uint8Array(buffLen);
 var lastIndex = 0;
 
 function createFile(dirEntry, fileName, isAppend) {
@@ -202,7 +207,9 @@ function myDecode(base62String) {
 };
 
 var myBle = {};
-myBle.data = 300000;
+myBle.data = buffLen;
+myBle.right = 0;
+myBle.left = 0;
 var myEvent;
 
 var app = {
@@ -211,6 +218,8 @@ var app = {
     initialize: function() {
         this.bindEvents();
         detailPage.hidden = true;
+        myCanvas.hidden = true;
+        app.showMainPage();
     },
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
@@ -245,7 +254,7 @@ var app = {
         window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
             console.log('file system open: ' + dirEntry.name);
             var isAppend = true;
-            createFile(dirEntry, "fileToAppend.txt", isAppend);
+            createFile(dirEntry, "fileToAppend2.txt", isAppend);
         }, debugLog("Fs done"));
     },
 
@@ -307,7 +316,7 @@ var app = {
         //console.log(data);
 
 
-        if (requested == "graph") {
+        if (requested == "graph" || requested == "count") {
             var temp = new Uint8Array(data);
             dataBuffer.set(temp, lastIndex);
             lastIndex = temp.length + lastIndex;
@@ -315,41 +324,67 @@ var app = {
                 var myDatas = "";
                 //console.log("eol");
                 //console.log(dataBuffer.length);
-                if (dataBuffer.length < 10000) {
+                if (dataBuffer.length < buffLen + 1) {
                     dataBuffer.forEach(function(tt) {
                         //console.log(tt);
                         if (tt != 0) {
                             myDatas = myDatas + String.fromCharCode(tt);
                         }
                     });
-
-                    //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
+                    console.log(myDatas);
                     var miDa = myDatas.split(",");
                     //console.log(miDa.length);
                     //console.log(miDa[2]);
+
+
+                    //console.log(theMin + " - " + theMax);
+                    rangeMin = document.getElementById('zoomViewMin');
+                    rangeMax = document.getElementById('zoomViewMax');
                     x = x + 1;
-                    if (x >= 400) {
+                    if (x >= 300) {
                         x = 0;
                         ctx.beginPath();
-                        ctx.rect(0, 0, 400, 600);
+                        ctx.rect(0, 0, 300, 200);
                         ctx.fillStyle = "white";
                         ctx.fill();
                     }
 
+                    if (miDa[0] == 200) {
+                        miDa[0] = 200;
 
+                    } else {
+                        miDa[0] = 0;
+                    }
+
+                    if (miDa[1] == 200) {
+                        miDa[1] = 200;
+
+                    } else {
+                        miDa[1] = 0;
+                    }
+
+                    var mapToNumber = function(x, in_min, in_max, out_min, out_max) {
+                        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+                    }
+
+                    var formulaSimple = function(chiffre) {
+                        return 200 - mapToNumber(Number(chiffre), 200 - rangeMin.value * 20, rangeMax.value * 20, 0, 200);
+                        //return 200 - Number(chiffre) / 4;
+                    }
 
                     ctx.beginPath();
-                    ctx.moveTo(x - 1, 600 - lasty / 4);
-                    ctx.lineTo(x, 600 - Number(miDa[0]) / 4);
+                    ctx.moveTo(x - 1, formulaSimple(lasty));
+                    ctx.lineTo(x, formulaSimple(miDa[0]));
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "#ff00ff";
                     ctx.stroke();
                     lasty = Number(miDa[0]);
+                    //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
 
 
                     ctx.beginPath();
-                    ctx.moveTo(x - 1, 600 - lastyk / 4);
-                    ctx.lineTo(x, 600 - Number(miDa[1]) / 4);
+                    ctx.moveTo(x - 1, formulaSimple(lastyk));
+                    ctx.lineTo(x, formulaSimple(miDa[1]));
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "#00ff00";
                     ctx.stroke();
@@ -360,8 +395,8 @@ var app = {
 
 
                     ctx.beginPath();
-                    ctx.moveTo(x - 1, 600 - lastyl / 4);
-                    ctx.lineTo(x, 600 - miDa[2] / 4);
+                    ctx.moveTo(x - 1, formulaSimple(lastyl));
+                    ctx.lineTo(x, formulaSimple(miDa[2]));
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "#0000ff";
                     ctx.stroke();
@@ -371,8 +406,8 @@ var app = {
                     miDa[3] = miDa[3].substring(0, miDa[3].length - 2);
 
                     ctx.beginPath();
-                    ctx.moveTo(x - 1, 600 - lastym / 4);
-                    ctx.lineTo(x, 600 - Number(miDa[3]) / 4);
+                    ctx.moveTo(x - 1, formulaSimple(lastym));
+                    ctx.lineTo(x, formulaSimple(miDa[3]));
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "#ff0000";
                     ctx.stroke();
@@ -383,7 +418,7 @@ var app = {
                 }
 
                 myDatas = "";
-                dataBuffer = new Uint8Array(300);
+                dataBuffer = new Uint8Array(buffLen);
                 lastIndex = 0;
             }
 
@@ -419,7 +454,7 @@ var app = {
                 }
 
                 stringArray = [];
-                dataBuffer = new Uint8Array(600000);
+                dataBuffer = new Uint8Array();
                 lastIndex = 0;
             }
             progressVal.value = 100 * (lastIndex / myBle.data);
@@ -436,6 +471,9 @@ var app = {
             var percent = document.getElementById("percent");
             percent.innerHTML = Math.round(100 * (lastIndex / myBle.data)) + "%";
             lastIndex = temp.length + lastIndex;
+            if (lastIndex > buffLen) {
+                console.log("too big" + lastIndex);
+            }
 
         }
 
@@ -467,7 +505,7 @@ var app = {
 
         });
         stringArray = [];
-        dataBuffer = new Uint8Array(300000);
+        dataBuffer = new Uint8Array(buffLen);
         lastIndex = 0;
         progressVal.value = 0;
         //resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
@@ -510,6 +548,20 @@ var app = {
                 }
                 if (ll[0] == "data") {
                     myBle.data = Number(ll[1]) * 8;
+                }
+                if (ll[0] == "liveLeftMove") {
+                    myBle.left = myBle.left + Number(ll[1]);
+                    var theTimeb = document.getElementById('theTimeb');
+                    theTimeb.innerHTML = myBle.left + "|" + myBle.right;
+                    console.log(myBle.left + "|" + myBle.right);
+                    console.log(ll);
+                }
+                if (ll[0] == "liveRightMove") {
+                    myBle.right = myBle.right + Number(ll[1]);
+                    var theTimeb = document.getElementById('theTimeb');
+                    theTimeb.innerHTML = myBle.left + "|" + myBle.right;
+                    console.log(myBle.left + "|" + myBle.right);
+                    console.log(ll);
                 }
 
             });
@@ -602,36 +654,59 @@ var app = {
 
     },
     askInfos: function(event) {
-        dataBuffer = new Uint8Array(300000);
+        buffLen = 100000;
+        dataBuffer = new Uint8Array(buffLen);
         requested = "infos";
         console.log("Asking Infos...");
         var dataToSend = "*kD0%mspEl,infos$";
         app.sendData(dataToSend);
+        myCanvas.hidden = true;
+        messageInput.hidden = false;
+        resultDiv.hidden = false;
+        myBle.right = 0;
+        myBle.left = 0;
+
+
     },
     askAllDatas: function(event) {
-
+        buffLen = 3000000;
+        dataBuffer = new Uint8Array(buffLen);
         modal.show();
-        dataBuffer = new Uint8Array(300000);
         requested = "sendAll";
         console.log("Asking All Datas...");
         var dataToSend = "*kD0%mspEl,sendAll$";
         app.sendData(dataToSend);
     },
     graphView: function(event) {
+        buffLen = 100000;
+        dataBuffer = new Uint8Array(buffLen);
+
         requested = "graph";
+        messageInput.hidden = true;
+        resultDiv.hidden = true;
         console.log("Asking GRaph...");
-        var dataToSend = "*kD0%mspEl,chart,1$";
+        var dataToSend = "*kD0%mspEl,chart,1,50$";
         app.sendData(dataToSend);
+        myCanvas.hidden = false;
     },
     sendCommand: function(event) {
-        dataBuffer = new Uint8Array(300000);
+        buffLen = 3000000;
+        dataBuffer = new Uint8Array(buffLen);
         requested = 'sendAll2';
+        if (messageInput.value.indexOf("Count") != -1) {
+            requested = 'infos';
+            myBle.left = 0;
+            myBle.right = 0;
+
+        }
+
         var pp = messageInput.value.split(',');
         var dataToSend2 = '*kD0%mspEl';
         pp.forEach(function(arg) {
             dataToSend2 = dataToSend2 + ',' + arg;
         });
         dataToSend2 = dataToSend2 + '$';
+        console.log(requested);
         app.sendData(dataToSend2);
     },
     sendData: function(dataToSend) { // send data to Arduino
@@ -717,14 +792,18 @@ var app = {
         app.sendData(dataToSend);
         var deviceId = event.target.dataset.deviceId;
         ble.disconnect(deviceId, app.showMainPage, app.onError);
+        myCanvas.hidden = true;
     },
     showMainPage: function() {
         mainPage.hidden = false;
         detailPage.hidden = true;
+        footerPage.hidden = true;
+        console.log("Show main page");
     },
     showDetailPage: function() {
         mainPage.hidden = true;
         detailPage.hidden = false;
+        footerPage.hidden = false;
     },
     onError: function(reason) {
         alert("ERROR: " + JSON.stringify(reason)); // real apps should use notification.alert
