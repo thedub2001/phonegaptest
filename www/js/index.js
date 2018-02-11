@@ -219,6 +219,7 @@ var app = {
         this.bindEvents();
         detailPage.hidden = true;
         myCanvas.hidden = true;
+        zoomView.hidden = true;
         app.showMainPage();
         window.plugins.insomnia.keepAwake();
     },
@@ -317,7 +318,7 @@ var app = {
         //console.log(data);
 
 
-        if (requested == "graph" || requested == "count") {
+        if (requested == "graph") {
             var temp = new Uint8Array(data);
             dataBuffer.set(temp, lastIndex);
             lastIndex = temp.length + lastIndex;
@@ -332,7 +333,7 @@ var app = {
                             myDatas = myDatas + String.fromCharCode(tt);
                         }
                     });
-                    console.log(myDatas);
+                    //console.log(myDatas);
                     var miDa = myDatas.split(",");
                     //console.log(miDa.length);
                     //console.log(miDa[2]);
@@ -341,28 +342,8 @@ var app = {
                     //console.log(theMin + " - " + theMax);
                     rangeMin = document.getElementById('zoomViewMin');
                     rangeMax = document.getElementById('zoomViewMax');
-                    x = x + 1;
-                    if (x >= 300) {
-                        x = 0;
-                        ctx.beginPath();
-                        ctx.rect(0, 0, 300, 200);
-                        ctx.fillStyle = "white";
-                        ctx.fill();
-                    }
 
-                    if (miDa[0] == 200) {
-                        miDa[0] = 200;
 
-                    } else {
-                        miDa[0] = 0;
-                    }
-
-                    if (miDa[1] == 200) {
-                        miDa[1] = 200;
-
-                    } else {
-                        miDa[1] = 0;
-                    }
 
                     var mapToNumber = function(x, in_min, in_max, out_min, out_max) {
                         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -373,46 +354,57 @@ var app = {
                         //return 200 - Number(chiffre) / 4;
                     }
 
-                    ctx.beginPath();
-                    ctx.moveTo(x - 1, formulaSimple(lasty));
-                    ctx.lineTo(x, formulaSimple(miDa[0]));
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "#ff00ff";
-                    ctx.stroke();
-                    lasty = Number(miDa[0]);
-                    //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
+                    if (miDa.length == 4) {
+                        x = x + 1;
+                        if (x >= 700) {
+                            x = 0;
+                            ctx.beginPath();
+                            ctx.rect(0, 0, 700, 200);
+                            ctx.fillStyle = "white";
+                            ctx.fill();
+                        }
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lasty));
+                        ctx.lineTo(x, formulaSimple(miDa[0]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#ff00ff";
+                        ctx.stroke();
+                        lasty = Number(miDa[0]);
+                        //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
 
 
-                    ctx.beginPath();
-                    ctx.moveTo(x - 1, formulaSimple(lastyk));
-                    ctx.lineTo(x, formulaSimple(miDa[1]));
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "#00ff00";
-                    ctx.stroke();
-                    lastyk = Number(miDa[1]);
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lastyk));
+                        ctx.lineTo(x, formulaSimple(miDa[1]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#00ff00";
+                        ctx.stroke();
+                        lastyk = Number(miDa[1]);
 
 
 
 
 
-                    ctx.beginPath();
-                    ctx.moveTo(x - 1, formulaSimple(lastyl));
-                    ctx.lineTo(x, formulaSimple(miDa[2]));
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "#0000ff";
-                    ctx.stroke();
-                    lastyl = miDa[2];
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lastyl));
+                        ctx.lineTo(x, formulaSimple(miDa[2]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#0000ff";
+                        ctx.stroke();
+                        lastyl = Number(miDa[2]);
 
 
-                    miDa[3] = miDa[3].substring(0, miDa[3].length - 2);
+                        miDa[3] = miDa[3].substring(0, miDa[3].length - 2);
 
-                    ctx.beginPath();
-                    ctx.moveTo(x - 1, formulaSimple(lastym));
-                    ctx.lineTo(x, formulaSimple(miDa[3]));
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "#ff0000";
-                    ctx.stroke();
-                    lastym = Number(miDa[3]);
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lastym));
+                        ctx.lineTo(x, formulaSimple(miDa[3]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#ff0000";
+                        ctx.stroke();
+                        lastym = Number(miDa[3]);
+                    }
+
                     //console.log(myDatas);
                     //console.log(Number(miDa[0]) + "," + Number(miDa[1]));
 
@@ -475,7 +467,6 @@ var app = {
             if (lastIndex > buffLen) {
                 console.log("too big" + lastIndex);
             }
-
         }
 
 
@@ -546,6 +537,15 @@ var app = {
                 }
                 if (ll[0] == "voltage") {
                     myBle.voltage = ll[1];
+                }
+                if (ll[0] == "scale") {
+                    myBle.scale = ll[1];
+                }
+                if (ll[0] == "liveCount") {
+                    myBle.liveCount = ll[1];
+                }
+                if (ll[0] == "hysteresis") {
+                    myBle.hysteresis = ll[1];
                 }
                 if (ll[0] == "data") {
                     myBle.data = Number(ll[1]) * 8;
@@ -664,6 +664,7 @@ var app = {
         myCanvas.hidden = true;
         messageInput.hidden = false;
         resultDiv.hidden = false;
+        zoomView.hidden = true;
         myBle.right = 0;
         myBle.left = 0;
 
@@ -679,34 +680,67 @@ var app = {
         app.sendData(dataToSend);
     },
     graphView: function(event) {
-        buffLen = 100000;
+        buffLen = 10000;
         dataBuffer = new Uint8Array(buffLen);
 
         requested = "graph";
         messageInput.hidden = true;
+        zoomView.hidden = false;
         resultDiv.hidden = true;
         console.log("Asking GRaph...");
-        var dataToSend = "*kD0%mspEl,chart,1,50$";
+        var dataToSend = "*kD0%mspEl,chart,1,30$";
         app.sendData(dataToSend);
         myCanvas.hidden = false;
     },
     sendCommand: function(event) {
         buffLen = 3000000;
         dataBuffer = new Uint8Array(buffLen);
-        requested = 'sendAll2';
-        if (messageInput.value.indexOf("Count") != -1) {
-            requested = 'infos';
+        requested = 'infos';
+        if (messageInput.value.indexOf("sendAll2") != -1) {
+            requested = 'sendAll2';
             myBle.left = 0;
             myBle.right = 0;
 
         }
-
         var pp = messageInput.value.split(',');
         var dataToSend2 = '*kD0%mspEl';
         pp.forEach(function(arg) {
             dataToSend2 = dataToSend2 + ',' + arg;
         });
         dataToSend2 = dataToSend2 + '$';
+        console.log(requested);
+        app.sendData(dataToSend2);
+    },
+    sendHyst: function(event) {
+        buffLen = 3000000;
+        dataBuffer = new Uint8Array(buffLen);
+        requested = 'infos';
+        var dataToSend2 = '*kD0%mspEl,hyst,12$';
+        console.log(requested);
+        app.sendData(dataToSend2);
+    },
+    sendHigh: function(event) {
+        buffLen = 3000000;
+        dataBuffer = new Uint8Array(buffLen);
+        requested = 'infos';
+        var dataToSend2 = '*kD0%mspEl,high,' + messageInput.value + '$';
+        console.log(requested);
+        app.sendData(dataToSend2);
+    },
+    sendLow: function(event) {
+        buffLen = 3000000;
+        dataBuffer = new Uint8Array(buffLen);
+        requested = 'infos';
+        var dataToSend2 = '*kD0%mspEl,low,' + messageInput.value + '$';
+        console.log(requested);
+        app.sendData(dataToSend2);
+    },
+    sendCount: function(event) {
+        console.log("ask count");
+        buffLen = 3000000;
+        dataBuffer = new Uint8Array(buffLen);
+        requested = 'infos';
+        var dataToSend2 = '*kD0%mspEl,liveCount,' + messageInput.value + '$';
         console.log(requested);
         app.sendData(dataToSend2);
     },

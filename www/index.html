@@ -173,20 +173,31 @@
                     <pre id="resultDiv" hidden="false" ripple></pre>
                 </div>
 
-                <canvas id="myCanvas" hidden="true" width="300" height="200" style="border:1px solid #c3c3c3;">
+                <canvas id="myCanvas" hidden="true" width="700" height="200" style="border:1px solid #c3c3c3;">
                 </canvas>
-                <ons-range style="width: 100%;" id="zoomViewMin" value="-100"></ons-range>
-                <ons-range style="width: 100%;" id="zoomViewMax" value="1000"></ons-range>
-
+                <div id="zoomView" hidden="true">
+                    <ons-range style="width: 100%;" id="zoomViewMin" value="0"></ons-range>
+                    <ons-range style="width: 100%;" id="zoomViewMax" value="100"></ons-range>
+                </div>
 
                 <div>
-                    <input type="text" hidden="false" class="text-input" id="messageInput" value="infos" />
+                    <input type="search" placeholder="Search" class="search-input" hidden="false" id="messageInput" value="infos" />
                 </div>
+
+                <button class="button button--outline" onclick="messageInput.value='hyst,'+messageInput.value;">Hyst</button>
+                <button class="button button--outline" onclick="messageInput.value='high,'+messageInput.value;">High</button>
+                <button class="button button--outline" onclick="messageInput.value='low,'+messageInput.value;">LOW</button>
+                <button class="button button--outline" onclick="messageInput.value='liveCount,'+messageInput.value;">liveCount</button>
+
+
+
+
 
 
 
 
                 <div class="toast toast--material" id="footerPage" hidden="true">
+
                     <button id="infoButton" class="toast__button toast--material__button">Infos</button>
                     <div class="toast__message toast--material__message"></div>
                     <button id="sendButton" class="toast__button toast--material__button">AsskAll</button>
