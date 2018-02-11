@@ -30,7 +30,7 @@ var modal = document.querySelector('ons-modal');
 var posX;
 var posY;
 var httpd = null;
-var buffLen = 3000000;
+var buffLen = 100000;
 var theMin = 999;
 var theMax = 0;
 
@@ -690,7 +690,7 @@ var app = {
 
     },
     askAllDatas: function(event) {
-        buffLen = 3000000;
+        buffLen = 100000;
         dataBuffer = new Uint8Array(buffLen);
         modal.show();
         requested = "sendAll";
@@ -712,7 +712,7 @@ var app = {
         myCanvas.hidden = false;
     },
     sendCommand: function(event) {
-        buffLen = 3000000;
+        buffLen = 100000;
         dataBuffer = new Uint8Array(buffLen);
         requested = 'infos';
         if (messageInput.value.indexOf("sendAll2") != -1) {
@@ -731,7 +731,7 @@ var app = {
         app.sendData(dataToSend2);
     },
     sendHyst: function(event) {
-        buffLen = 3000000;
+        buffLen = 100000;
         dataBuffer = new Uint8Array(buffLen);
         requested = 'infos';
         var dataToSend2 = '*kD0%mspEl,hyst,12$';
@@ -739,7 +739,7 @@ var app = {
         app.sendData(dataToSend2);
     },
     sendHigh: function(event) {
-        buffLen = 3000000;
+        buffLen = 100000;
         dataBuffer = new Uint8Array(buffLen);
         requested = 'infos';
         var dataToSend2 = '*kD0%mspEl,high,' + messageInput.value + '$';
@@ -747,7 +747,7 @@ var app = {
         app.sendData(dataToSend2);
     },
     sendLow: function(event) {
-        buffLen = 3000000;
+        buffLen = 100000;
         dataBuffer = new Uint8Array(buffLen);
         requested = 'infos';
         var dataToSend2 = '*kD0%mspEl,low,' + messageInput.value + '$';
@@ -756,7 +756,7 @@ var app = {
     },
     sendCount: function(event) {
         console.log("ask count");
-        buffLen = 3000000;
+        buffLen = 100000;
         dataBuffer = new Uint8Array(buffLen);
         requested = 'infos';
         var dataToSend2 = '*kD0%mspEl,liveCount,' + messageInput.value + '$';
