@@ -51,7 +51,7 @@ function updateStatus() {
             document.getElementById('localpath').innerHTML = "<br/>localPath: " + path;
         });
     } else {
-        alert('CorHttpd plugin not available/ready.');
+        console.log('CorHttpd plugin not available/ready.');
     }
 }
 
@@ -74,7 +74,7 @@ function startServer(wwwroot) {
 
         }, function() {});
     } else {
-        alert('CorHttpd plugin not available/ready.');
+        console.log('CorHttpd plugin not available/ready.');
     }
 }
 
@@ -87,7 +87,7 @@ function stopServer() {
             document.getElementById('url').innerHTML = 'failed to stop server' + error;
         });
     } else {
-        alert('CorHttpd plugin not available/ready.');
+        console.log('CorHttpd plugin not available/ready.');
     }
 }
 
@@ -354,56 +354,56 @@ var app = {
                         //return 200 - Number(chiffre) / 4;
                     }
 
-                    if (miDa.length == 4) {
-                        x = x + 1;
-                        if (x >= 700) {
-                            x = 0;
-                            ctx.beginPath();
-                            ctx.rect(0, 0, 700, 200);
-                            ctx.fillStyle = "white";
-                            ctx.fill();
-                        }
+                    //if (miDa.length == 5) {
+                    x = x + 1;
+                    if (x >= 350) {
+                        x = 0;
                         ctx.beginPath();
-                        ctx.moveTo(x - 1, formulaSimple(lasty));
-                        ctx.lineTo(x, formulaSimple(miDa[0]));
-                        ctx.lineWidth = 1;
-                        ctx.strokeStyle = "#ff00ff";
-                        ctx.stroke();
-                        lasty = Number(miDa[0]);
-                        //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
-
-
-                        ctx.beginPath();
-                        ctx.moveTo(x - 1, formulaSimple(lastyk));
-                        ctx.lineTo(x, formulaSimple(miDa[1]));
-                        ctx.lineWidth = 1;
-                        ctx.strokeStyle = "#00ff00";
-                        ctx.stroke();
-                        lastyk = Number(miDa[1]);
-
-
-
-
-
-                        ctx.beginPath();
-                        ctx.moveTo(x - 1, formulaSimple(lastyl));
-                        ctx.lineTo(x, formulaSimple(miDa[2]));
-                        ctx.lineWidth = 1;
-                        ctx.strokeStyle = "#0000ff";
-                        ctx.stroke();
-                        lastyl = Number(miDa[2]);
-
-
-                        miDa[3] = miDa[3].substring(0, miDa[3].length - 2);
-
-                        ctx.beginPath();
-                        ctx.moveTo(x - 1, formulaSimple(lastym));
-                        ctx.lineTo(x, formulaSimple(miDa[3]));
-                        ctx.lineWidth = 1;
-                        ctx.strokeStyle = "#ff0000";
-                        ctx.stroke();
-                        lastym = Number(miDa[3]);
+                        ctx.rect(0, 0, 350, 200);
+                        ctx.fillStyle = "white";
+                        ctx.fill();
                     }
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, formulaSimple(lasty));
+                    ctx.lineTo(x, formulaSimple(miDa[0]));
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#ff00ff";
+                    ctx.stroke();
+                    lasty = Number(miDa[0]);
+                    //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
+
+
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, formulaSimple(lastyk));
+                    ctx.lineTo(x, formulaSimple(miDa[1]));
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#00ff00";
+                    ctx.stroke();
+                    lastyk = Number(miDa[1]);
+
+
+
+
+
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, formulaSimple(lastyl));
+                    ctx.lineTo(x, formulaSimple(miDa[2]));
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#0000ff";
+                    ctx.stroke();
+                    lastyl = Number(miDa[2]);
+
+
+                    miDa[3] = miDa[3].substring(0, miDa[3].length - 2);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x - 1, formulaSimple(lastym));
+                    ctx.lineTo(x, formulaSimple(miDa[3]));
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#ff0000";
+                    ctx.stroke();
+                    lastym = Number(miDa[3]);
+                    //}
 
                     //console.log(myDatas);
                     //console.log(Number(miDa[0]) + "," + Number(miDa[1]));
@@ -458,15 +458,26 @@ var app = {
             dataBuffer.set(temp, lastIndex);
             if (dataBuffer.indexOf(35) != -1) { //Si caractere de fin : #
                 debugLog("end of transmission de ouf");
+                console.log("end of transmission de ouf");
                 app.prepareData();
+                lastIndex = 0;
             }
-            progressVal.value = 100 * (lastIndex / myBle.data);
-            var percent = document.getElementById("percent");
-            percent.innerHTML = Math.round(100 * (lastIndex / myBle.data)) + "%";
-            lastIndex = temp.length + lastIndex;
+            if (requested != "infos") {
+                var progressVal = document.getElementById("progressVal");
+                progressVal.value = 100 * (lastIndex / myBle.data);
+                var percent = document.getElementById("percent");
+                percent.innerHTML = Math.round(100 * (lastIndex / myBle.data)) + "%";
+            }
+
+
+
+
             if (lastIndex > buffLen) {
                 console.log("too big" + lastIndex);
             }
+            lastIndex = temp.length + lastIndex;
+
+
         }
 
 
@@ -474,7 +485,7 @@ var app = {
 
     },
     prepareData: function(event) { // save data to text file
-        //resultDiv.innerHTML = resultDiv.innerHTML + "Debut Prepare <br/>";
+        resultDiv.innerHTML = resultDiv.innerHTML + "Debut Prepare <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
 
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
@@ -509,7 +520,9 @@ var app = {
             infoss.forEach(function(line) {
                 if (line.indexOf("#") != -1) {} else {
                     var isStar = line.indexOf("*");
-                    line = line.substring(isStar + 1);
+                    if (isStar != -1) {
+                        line = line.substring(isStar + 1);
+                    }
                     var arr = line.split(',');
 
                     result.push(arr);
@@ -517,7 +530,9 @@ var app = {
 
             });
             result.forEach(function(ll) {
-                debugLog(ll[0] + " is : " + ll[1]);
+                //console.log(ll);
+                //debugLog(ll[0] + " is : " + ll[1]);
+                debugLog(ll);
                 if (ll[0] == "name") {
                     myBle.name = ll[1];
                     blePos.innerHTML = posX + " " + posY;
@@ -566,6 +581,9 @@ var app = {
                 }
 
             });
+            lastIndex = 0;
+            buffLen = 100000;
+            dataBuffer = new Uint8Array(buffLen);
             resultDiv.scrollTop = resultDiv.scrollHeight;
         }
         if (requested == "sendAll") {
@@ -655,6 +673,7 @@ var app = {
 
     },
     askInfos: function(event) {
+        lastIndex = 0;
         buffLen = 100000;
         dataBuffer = new Uint8Array(buffLen);
         requested = "infos";
