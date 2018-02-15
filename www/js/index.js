@@ -690,7 +690,7 @@ var app = {
 
     },
     askAllDatas: function(event) {
-        buffLen = 100000;
+        buffLen = 1000000;
         dataBuffer = new Uint8Array(buffLen);
         modal.show();
         requested = "sendAll";
@@ -699,7 +699,7 @@ var app = {
         app.sendData(dataToSend);
     },
     graphView: function(event) {
-        buffLen = 100000;
+        buffLen = 1000000;
         dataBuffer = new Uint8Array(buffLen);
 
         requested = "graph";
@@ -712,7 +712,7 @@ var app = {
         myCanvas.hidden = false;
     },
     sendCommand: function(event) {
-        buffLen = 100000;
+        buffLen = 1000000;
         dataBuffer = new Uint8Array(buffLen);
         requested = 'infos';
         if (messageInput.value.indexOf("sendAll2") != -1) {
