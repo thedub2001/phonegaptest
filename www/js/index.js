@@ -699,7 +699,7 @@ var app = {
         app.sendData(dataToSend);
     },
     graphView: function(event) {
-        buffLen = 1000000;
+        buffLen = 10000;
         dataBuffer = new Uint8Array(buffLen);
 
         requested = "graph";
