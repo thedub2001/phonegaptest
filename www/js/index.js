@@ -707,7 +707,7 @@ var app = {
         zoomView.hidden = false;
         resultDiv.hidden = true;
         console.log("Asking GRaph...");
-        var dataToSend = "*kD0%mspEl,chart,1,30$";
+        var dataToSend = "*kD0%mspEl,chart,1,33$";
         app.sendData(dataToSend);
         myCanvas.hidden = false;
     },
